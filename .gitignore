@@ -1,28 +1,83 @@
-# Internal company datasets — NEVER commit
-# Confidential company datasets
-/data/sample_files/
+# Internal workbooks and local data (current and proposed sample paths)
+/data/**
+!/data/README.md
+*.xlsx
+*.XLSX
+*.xls
+*.XLS
+*.xlsm
+*.XLSM
+*.xlsb
+*.XLSB
+~$*
 
-# Generated reports
-/data/outputs/
+# Generated output and logs
+/outputs/
+/reports/
+/artifacts/
+logs/
+*.log
+*.log.*
+*.tmp
+*.bak
 
 # Environment variables and credentials
 .env
 .env.*
 !.env.example
+.aws/
+.secrets/
+secrets/
+credentials/
+credentials*.json
+service-account*.json
+.npmrc
+.netrc
+.pypirc
+.ssh/
+*.pem
+*.key
+*.p12
+*.pfx
 
-# Python
+# Python environments, caches and build output
+.venv/
+venv/
+env/
 __pycache__/
 *.py[cod]
-.venv/
-
-# Local databases
-*.db
-*.sqlite
-*.sqlite3
-
-# Node.js
-node_modules/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+*.egg-info/
+build/
 dist/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
 
-# Generated reports
-/data/outputs/
+# Local databases, including SQLite journal/WAL files
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# Node.js and frontend generated output
+node_modules/
+.vite/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Machine-specific files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
