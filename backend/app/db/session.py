@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 
 from fastapi import Request
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -14,13 +14,21 @@ def create_database_engine(settings: Settings) -> Engine:
     options = {}
     if url.database in {None, "", ":memory:"}:
         options["poolclass"] = StaticPool
-    return create_engine(
+    engine = create_engine(
         url,
         connect_args={"check_same_thread": False, "timeout": 3},
         pool_pre_ping=True,
         hide_parameters=True,
         **options,
     )
+
+    @event.listens_for(engine, "connect")
+    def enable_foreign_keys(connection, connection_record):
+        cursor = connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    return engine
 
 
 def get_session(request: Request) -> Iterator[Session]:

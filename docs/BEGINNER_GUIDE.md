@@ -58,6 +58,14 @@ Pydantic Settings reads safe defaults, your ignored root `.env`, and environment
 
 The 25 foundation tests exercise real behavior using temporary databases and synthetic values. They do not touch the original workbooks or the development database. A request ID ties a response to metadata logs without logging customer messages or request credentials. See [backend/README.md](../backend/README.md) for commands and verification results.
 
+## What Prompt 0.3 adds
+
+You can now create a project and cycle, upload each source workbook, and retrieve its saved evidence. Three small adapters translate the known worksheet layouts into structured records. A separate persistence service saves the workbook metadata and all rows in one **transaction**: everything succeeds together, or the database rolls back the upload. Re-uploading identical bytes returns the existing workbook; different bytes for the occupied role require a new cycle.
+
+Raw evidence and normalized keys answer different questions. Raw text shows exactly what the source cell said, including its whitespace; normalized keys make later comparisons consistent. A normalized key is not a match result, a customer decision or evidence of access. Manual annotations remain separate from the tool's outcome. Excel row numbers make it possible to go back to the original cell.
+
+The default tests and demo workbooks use fictional data generated from committed Python source. A second Windows laptop can install the declared dependencies, run migrations to create its own database, and generate those inputs without company files. An automated test exercises a fresh source copy under a different folder name with spaces and outbound network calls blocked. Initial installation still needs package access, and an actual second laptop has not been tested. Prompt 0.3 adds no Docker or setup/launch scripts.
+
 ## How the future application fits together
 
 ```mermaid
@@ -97,7 +105,7 @@ The **database** remembers projects, cycles, source records and decisions betwee
 | Docker Compose | Starts a defined set of app services | Useful later for repeatable setup, after local commands work |
 | PostgreSQL | Runs a shared database server | A possible later choice for concurrent users and deployment requirements |
 
-The backend dependencies listed for Prompt 0.2 are now installed in an isolated Python 3.12 environment, including Pydantic Settings for configuration. Frontend tools, Docker, PostgreSQL and AI remain future choices. OpenPyXL/pandas are available, but the API does not ingest workbooks yet. We will explain the code for each new workflow when it is introduced.
+The backend dependencies are installed in an isolated Python 3.12 environment, including Pydantic Settings, multipart upload support and XML protection. Frontend tools, Docker, PostgreSQL and AI remain future choices. OpenPyXL now parses source workbooks through the API; pandas is available but not needed for these adapters. We will explain the code for each new workflow when it is introduced.
 
 ## Engineering terms you will encounter
 
@@ -119,6 +127,6 @@ The best additions suggested by discovery are practical: clear import warnings, 
 
 ## Explain the current stage to a panel
 
-> TraceSync will help leads turn two technical Excel reports into a traceable, reviewed customer report. We inspected all seven worksheets and documented the actual schemas, then built a local API foundation with health/readiness checks, one Project table and 25 passing tests. The supplied reports share 172 normalized type-and-name identities, but that does not prove error equivalence or remediation success. The detailed log has 203 observed message blocks, which need validation before parent-context linking. The next step is evidence-preserving ingestion, followed by comparison, human review and approved export. We have not measured automation accuracy or time savings yet.
+> TraceSync will help leads turn two technical Excel reports into a traceable, reviewed customer report. We inspected all seven worksheets, built the local API/database foundation, and now ingest both source reports while preserving messages, annotations and source rows. Original ingestion matches the observed 361 / 205 / 1,226 records; portable synthetic tests also run without company files. The 172 common type-and-name identities and 203 observed message blocks remain discovery evidence, not implemented matching or proven remediation outcomes. Comparison, human review and approved export are next. We have not measured automation accuracy or review-time savings.
 
-This describes the work honestly: discovery and the backend foundation are complete, the business workflow is still to be built, and future impact will be measured rather than assumed.
+This describes the work honestly: discovery, foundation and ingestion are complete; reconciliation and customer decisions are still to be built, and future impact will be measured rather than assumed.

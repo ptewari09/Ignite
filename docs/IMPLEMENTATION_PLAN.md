@@ -1,8 +1,18 @@
 # TraceSync implementation plan
 
-Plan based on [Project_Reference.md](Project_Reference.md) and the inspected schemas. Updated on 2026-10-24 for a solo developer. Prompt 0.1 discovery and Prompt 0.2 backend foundation are complete. Ingestion and later business workflows remain future work.
+Plan based on [Project_Reference.md](Project_Reference.md) and the inspected schemas. Updated on 2026-10-24 for a solo developer. Prompt 0.1 discovery, Prompt 0.2 foundation and Prompt 0.3 ingestion are complete. Reconciliation and later business workflows remain future work.
 
-## Current boundary — Prompt 0.2 backend foundation complete
+## Current boundary — Prompt 0.3 ingestion complete
+
+- Added project/cycle endpoints and one atomic ingestion service for transformation/post-upload workbooks, with explicit source models and Alembic revision `0002_add_ingestion`.
+- Implemented separate `Detailed_LOG`, `Objects` and `Errors` adapters, preserving raw payloads, normalized identity fields, repeated rows, manual annotations and Excel-row provenance.
+- Added validation, hash-based idempotent repeat uploads, role-conflict rejection and paginated metadata/evidence retrieval. No parent linking or error classification is performed.
+- Added fictional source-controlled generators, synthetic parser/API tests and a source-copy portability test with a fresh migrated database and outbound connections blocked. Default suite: 67 passed, one opt-in company-data check skipped. The full suite with local verification enabled passed all 68 tests, including counts 361 / 205 / 1,226 and unchanged originals.
+- Documented fresh Windows setup, configurable limits, synthetic upload/retrieval commands and the remaining second-laptop setup steps in [backend/README.md](../backend/README.md). Initial package installation needs network; ingestion does not. No Docker or setup/launch automation was added.
+
+The next separately authorized stage is reconciliation. Prompt 0.3 does not approve customer actions, infer scope from source absence, group blockers, build UI or generate reports.
+
+## Prompt 0.2 backend foundation complete
 
 The attached Prompt 0.2 narrows this step to a foundation, not the full ingestion milestone below. It supplies:
 
@@ -13,7 +23,7 @@ The attached Prompt 0.2 narrows this step to a foundation, not the full ingestio
 - Twenty-five passing isolated tests, dependency consistency check and real Uvicorn health/readiness/OpenAPI/Swagger verification. One upstream Starlette/HTTPX TestClient deprecation warning remains documented.
 - Beginner-friendly [backend setup instructions](../backend/README.md).
 
-The development database is local and gitignored. No ingestion, project CRUD, cycle/source/finding tables, reconciliation, frontend, AI, authentication or Docker were added. The next step requires a separate ingestion instruction.
+The development database is local and gitignored. At the end of Prompt 0.2 there was no ingestion, project CRUD or cycle/source evidence model. Prompt 0.3 adds those ingestion features above; reconciliation, frontend, AI, authentication and Docker remain unimplemented.
 
 ## Prompt 0.1 — initialization and discovery complete
 
@@ -26,7 +36,7 @@ Completed:
 - Added a reusable read-only inspector and expanded `.gitignore` coverage.
 - Added beginner documentation explaining the product, layers and engineering decisions.
 
-At the end of Prompt 0.1 there were no application routes or database tables. The original files and project reference remain unchanged. Import adapters, reconciliation rules, UI, report generation and AI remain outside both completed prompts.
+At the end of Prompt 0.1 there were no application routes or database tables. The original files and project reference remain unchanged. Import adapters were subsequently added in Prompt 0.3; reconciliation rules, UI, report generation and AI remain future work.
 
 Verification performed for this step:
 
@@ -42,13 +52,13 @@ Those checks cover the discovery utility, not matching accuracy. The separate Pr
 
 Use the [stage-specific questions for seniors](SENIOR_QUESTIONS.md), starting with scope/access mechanics and message-block semantics. Record answers in [mapping-rules.md](mapping-rules.md) with source, date, examples and acceptance checks. BR-001 records customer reporting of out-of-scope objects; BR-002 defines them by absence from the shared TR; BR-003 records that customers usually add the object to that TR or provide another TR. Authoritative membership evidence, label ownership, decision/response evidence, other inclusion rules, repeated object rows and recheck membership still require clarification. Clearly distinguish confirmed requirements from proposals.
 
-Create small **synthetic** workbook fixtures covering the verified layouts, padding, blank identifiers, repeated typed keys, multiple findings, a component message and an empty summary. Keep supplied internal workbooks local and ignored. Document expected counts without copying names or free text into committed fixtures.
+Prompt 0.3 supplies **synthetic** workbook fixtures covering verified layouts, padding, blank identifiers, repeated keys, several findings and formatting-only rows. Extend these when new verified rules require more cases. Keep supplied internal workbooks local and ignored; committed fixtures must not copy their identifiers or free text.
 
 **Exit check:** every adapter field maps to an actual source column; unconfirmed rules have a visible review fallback. Unresolved inclusion rules need not block ingestion, but must block automatic inclusion/approval. Unconfirmed block semantics must not enable automatic parent linkage.
 
 ## Milestone 1 — local backend and ingestion
 
-**Progress:** the foundation portion is complete under Prompt 0.2. Uploads, adapters, cycles and raw-record persistence remain unimplemented; this whole milestone is not yet complete.
+**Progress:** the foundation and ingestion portions are complete under Prompts 0.2–0.3. This milestone's upload/parsing/persistence scope is implemented; reconciliation remains separate.
 
 **Deliverable:** both source files upload and return verified counts and source-row provenance.
 
@@ -122,4 +132,4 @@ Document exact local start commands, versioned dependencies, backup synthetic da
 - Consider a warning when manual labels disagree with broad tool status, and a visible unsupported-context queue. These small additions address observed data issues without changing business decisions.
 - Use synthetic fixtures to make demonstrations repeatable and privacy-conscious. Avoid polishing secondary features before the export can be trusted.
 
-The user will authorize each next implementation task. Prompt 0.2 authorizes the completed backend foundation only; this future plan does not authorize advancing into ingestion.
+The user will authorize each next implementation task. Prompt 0.3 authorizes the completed ingestion scope only; this future plan does not authorize advancing into reconciliation.

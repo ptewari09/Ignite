@@ -25,6 +25,9 @@ class Settings(BaseSettings):
 
     environment: Literal["local", "test"] = "local"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
+    max_upload_bytes: int = Field(default=20 * 1024 * 1024, gt=0)
+    max_workbook_uncompressed_bytes: int = Field(default=100 * 1024 * 1024, gt=0)
+    max_sheet_rows: int = Field(default=50_000, gt=1)
     database_url: str = Field(
         default="sqlite+pysqlite:///data/local/tracesync.db", repr=False
     )

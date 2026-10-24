@@ -140,4 +140,4 @@ Use [SENIOR_QUESTIONS.md](SENIOR_QUESTIONS.md) for the current priorities and qu
 
 ## Completion and practical next step
 
-Prompt 0.1 is complete: all seven sheets were inspected, schemas and feasibility documented, folders reserved, and local data exclusions expanded. Prompt 0.2 subsequently adds only the backend foundation described in [backend/README.md](../backend/README.md). Workbook adapters/fixtures, matching, UI, exports and AI remain future work. Ingestion should preserve evidence while unresolved interpretation rules retain review fallbacks.
+Prompt 0.1 is complete: all seven sheets were inspected, schemas and feasibility documented, folders reserved, and local data exclusions expanded. Prompt 0.2 added the backend foundation; Prompt 0.3 added evidence-preserving ingestion and synthetic fixtures, described in [backend/README.md](../backend/README.md). Original local ingestion counts agree with discovery. Matching, message-parent linking, UI, customer exports and AI remain future work; none of the proposed reconciliation rules above have been automatically enabled.

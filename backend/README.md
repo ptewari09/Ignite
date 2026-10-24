@@ -1,13 +1,15 @@
 # TraceSync API
 
-Prompt 0.2 supplies the local backend foundation: validated configuration, health/readiness routes, request metadata logging, consistent errors, SQLAlchemy sessions, and one migration for a minimal `Project` model. The existing discovery inspector remains available. Workbook ingestion, reconciliation, project CRUD endpoints, frontend work and AI are later tasks.
+Prompt 0.3 adds project/cycle management, validated XLSX ingestion, transactional evidence persistence and paginated evidence retrieval. Prompt 0.2 health/readiness, configuration and logging remain in place. The API preserves evidence and normalized comparison keys; it does not reconcile errors, infer scope/access, link parent components, approve actions or generate customer reports.
 
 ## Requirements and PowerShell setup
 
-Use **Python 3.12**. Run these commands from the existing repository root; its directory name does not need to match the product name.
+On a fresh Windows laptop, install **64-bit Python 3.12** with pip/venv and **Git** for cloning. Use PowerShell 5.1 or newer. Native `curl.exe` is needed only for the multipart examples below; Swagger provides an alternative. No separate SQLite server, Node.js, Excel installation, Docker or pre-existing virtual environment/database is needed.
+
+Commit/push the reviewed source changes before cloning them on the demo laptop. Keep customer files and the previous laptop's `.env`, database and virtual environment out of that transfer. Open PowerShell in the **root of the fresh clone**, regardless of its folder name, then run:
 
 ```powershell
-Set-Location 'C:\Users\Pramiti Tiwari\Documents\Ignite_SoloStack'
+# Current directory: your clone's root; no machine-specific path is required.
 py -3.12 -m venv backend/.venv
 & .\backend\.venv\Scripts\python.exe -m pip install -c backend/requirements-dev.lock -e './backend[dev]'
 if (-not (Test-Path -LiteralPath '.env')) {
@@ -17,7 +19,7 @@ if (-not (Test-Path -LiteralPath '.env')) {
 
 If `py` is unavailable, use `python -m venv backend/.venv` after checking that `python --version` reports 3.12. Calling the environment's executable directly avoids PowerShell activation-policy problems and keeps packages out of Anaconda/global Python. The `dev` extra adds Pytest and HTTPX; runtime-only installation is `pip install -e ./backend` using that same environment's Python.
 
-Dependencies are declared in [pyproject.toml](pyproject.toml); [requirements-dev.lock](requirements-dev.lock) pins the tested runtime/development resolution without local machine paths. FastAPI/Uvicorn serve HTTP; Pydantic validates data; Pydantic Settings loads configuration; SQLAlchemy manages database interactions; Alembic versions the schema. OpenPyXL and pandas are installed for the prescribed stack; ingestion is not implemented yet. The inspector uses OpenPyXL independently of the API.
+Dependencies are declared in [pyproject.toml](pyproject.toml); [requirements-dev.lock](requirements-dev.lock) pins the tested runtime/development resolution without local machine paths. FastAPI/Uvicorn serve HTTP; Pydantic validates data; Pydantic Settings loads configuration; SQLAlchemy manages database interactions; Alembic versions the schema. OpenPyXL parses the workbooks without losing Excel row numbers; pandas remains available but is not needed for these adapters. `python-multipart` supports file/form uploads, and `defusedxml` enables OpenPyXL's XML protection. No runtime API calls to external services are used.
 
 ## Configuration
 
@@ -29,6 +31,9 @@ Copy the root [.env.example](../.env.example) to `.env` and edit only the local 
 | `TRACESYNC_LOG_LEVEL` | `INFO`; `DEBUG`, `WARNING`, `ERROR` also accepted |
 | `TRACESYNC_DATABASE_URL` | `sqlite+pysqlite:///data/local/tracesync.db` |
 | `TRACESYNC_CORS_ORIGINS` | JSON list containing `http://localhost:5173` and `http://127.0.0.1:5173` |
+| `TRACESYNC_MAX_UPLOAD_BYTES` | `20971520` (20 MiB per workbook) |
+| `TRACESYNC_MAX_WORKBOOK_UNCOMPRESSED_BYTES` | `104857600` (100 MiB expanded XLSX ZIP contents) |
+| `TRACESYNC_MAX_SHEET_ROWS` | `50000` physical rows per parsed worksheet |
 
 Relative database paths resolve from the repository root, not the shell directory. This foundation accepts SQLite/pysqlite URLs without URI query options. Explicit HTTP(S) CORS origins are required; wildcard origins are rejected. The application title and service identity are fixed to **TraceSync API**.
 
@@ -41,7 +46,7 @@ From the repository root:
 & .\backend\.venv\Scripts\python.exe -m alembic -c backend/alembic.ini current
 ```
 
-The explicit migration command creates the database directory if needed, then creates the `projects` table and Alembic's version table. The API never calls `create_all()` or runs migrations at startup. Alembic stores the applied revision so repeating `upgrade head` is safe.
+The explicit migration command creates the database directory if needed and applies all revisions, including fresh database creation. The API never calls `create_all()` or runs migrations at startup. Alembic stores the applied revision so repeating `upgrade head` is safe. Latest revision: **`0002_add_ingestion`**; it adds five tables while preserving existing projects.
 
 The initial revision, `0001_create_projects`, creates only:
 
@@ -54,6 +59,18 @@ The initial revision, `0001_create_projects`, creates only:
 | `updated_at` | Required UTC timestamp, refreshed on ORM updates |
 
 SQLite does not retain timezone offsets in its native datetime representation. The model normalizes aware datetimes to UTC for storage and restores the UTC timezone on ORM reads; naive datetimes are rejected. UUID and timestamp defaults are applied by the ORM. Direct SQL writers would need to supply those values. No production tables or customer data are seeded.
+
+The new tables are:
+
+| Table | Responsibility |
+|---|---|
+| `cycles` | Project relationship, label, creation time and ingestion status |
+| `workbooks` | Role, filename basename, hash, byte size, upload time, counts and safe warnings |
+| `transformation_findings` | Original transformation fields, normalized identities, raw payload and provenance |
+| `upload_objects` | Original object/tool fields and separate imported manual annotations |
+| `upload_errors` | Original technical messages, sequence numbers, raw identity fields and provenance |
+
+Foreign keys are enabled in SQLite. Each cycle has at most one workbook per role. Evidence uniqueness uses workbook/sheet/Excel row, **never object identity**. Repeated objects/findings/messages remain separate rows. A cycle is `empty`, `partial` after one role, or `complete` after both roles; `complete` means only that ingestion finished, not that reconciliation, review or customer access is complete. Failed ingestions leave no workbook or evidence rows.
 
 ## Start the server and inspect it
 
@@ -76,6 +93,70 @@ Invoke-RestMethod -Uri 'http://127.0.0.1:8000/api/v1/ready'
 | `/redoc` | Alternative API documentation |
 | `/openapi.json` | Machine-readable contract, titled `TraceSync API` |
 
+New routes, all under `/api/v1`:
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST / GET | `/projects` | Create/list projects |
+| POST / GET | `/projects/{project_id}/cycles` | Create/list a project's cycles |
+| POST | `/cycles/{cycle_id}/workbooks` | Upload one file with form field `role` |
+| GET | `/cycles/{cycle_id}/workbooks` | List ingested workbook metadata |
+| GET | `/cycles/{cycle_id}/transformation-findings` | Retrieve transformation evidence |
+| GET | `/cycles/{cycle_id}/upload-objects` | Retrieve upload object evidence and manual annotations |
+| GET | `/cycles/{cycle_id}/upload-errors` | Retrieve technical message evidence |
+
+Collections return `items`, `total`, `limit` and `offset`. Default limit is 50; accepted limits are 1–200, and offsets are nonnegative. Evidence includes its workbook ID, worksheet, one-based Excel row, raw fields, normalized keys and raw payload. POST project/cycle requests accept `name`; projects also accept an optional `description`.
+
+## Portable synthetic ingestion walkthrough
+
+From the clone root, generate fictional inputs with no company data:
+
+```powershell
+& .\backend\.venv\Scripts\python.exe -m app.scripts.generate_demo_workbooks --output data/demo
+```
+
+This produces `synthetic-transformation.xlsx` and `synthetic-post-upload.xlsx` under the ignored `data/demo/` directory. Existing files are left unchanged. The generator uses fictional identifiers/messages only and does not read `data/sample_files/`.
+
+With the server running, use another PowerShell terminal in the clone root:
+
+```powershell
+$api = 'http://127.0.0.1:8000/api/v1'
+$project = Invoke-RestMethod -Method Post -Uri "$api/projects" -ContentType 'application/json' -Body (@{name='Synthetic demo'; description='Fictional data only'} | ConvertTo-Json)
+$projectId = $project.id
+$cycle = Invoke-RestMethod -Method Post -Uri "$api/projects/$projectId/cycles" -ContentType 'application/json' -Body (@{name='Demo cycle 1'} | ConvertTo-Json)
+$cycleId = $cycle.id
+$transformationPath = (Resolve-Path -LiteralPath 'data/demo/synthetic-transformation.xlsx').Path
+$postUploadPath = (Resolve-Path -LiteralPath 'data/demo/synthetic-post-upload.xlsx').Path
+
+curl.exe -sS -F 'role=transformation' -F "file=@$transformationPath" "$api/cycles/$cycleId/workbooks"
+curl.exe -sS -F 'role=post_upload' -F "file=@$postUploadPath" "$api/cycles/$cycleId/workbooks"
+
+Invoke-RestMethod -Uri "$api/projects"
+Invoke-RestMethod -Uri "$api/projects/$projectId/cycles"
+Invoke-RestMethod -Uri "$api/cycles/$cycleId/workbooks"
+Invoke-RestMethod -Uri "$api/cycles/$cycleId/transformation-findings?limit=2&offset=0"
+Invoke-RestMethod -Uri "$api/cycles/$cycleId/upload-objects"
+Invoke-RestMethod -Uri "$api/cycles/$cycleId/upload-errors"
+```
+
+Expected synthetic counts: **3 transformation findings, 3 upload objects, 4 upload messages**. A blank physical row and formatting-only rows are intentionally present in the transformation fixture, so its evidence rows are 2, 4 and 5. Repeated names and unnamed messages demonstrate preservation.
+
+For approved local use with the actual source files, replace the two resolved demo paths with `data/sample_files/Zf_LE1_Transformation_Check_Objects_Error_LOG.XLSX` and `data/sample_files/Upload errors.xlsx`, and use a new cycle. The customer-reference workbook is not a supported role or pipeline input. The original files are read by the client and remain unchanged.
+
+## Parsing, validation and evidence integrity
+
+Separate adapters parse `Detailed_LOG`, `Objects` and `Errors`. A shared worksheet reader checks row-1 headers and source cells. Parsers return structured records/warnings; `services/ingestion.py` persists metadata, evidence and cycle status in one transaction. The API does not retain uploaded binaries on disk or in SQLite; keep originals separately. Filename metadata drops directory components so local paths are not exposed.
+
+The adapters require the documented headers for the currently verified layouts: seven transformation columns, seven upload-object columns (including the explicitly manual fields), and six upload-message columns. Header whitespace is normalized; original header spellings remain JSON keys. `Summary` is optional and ignored for processing. Additional named columns are preserved; unlabeled populated columns and colliding headers are rejected to avoid data loss. Supporting pristine exports without the manual columns is a future adapter decision, not a silent inference.
+
+Only readable `.xlsx` files are accepted, case-insensitively. Validation checks cycle/role, extension, actual workbook readability, required tabs/headers and configured size/row limits. Expanded ZIP size is bounded, and relevant sheets are limited to 128 columns. Formula/error cells are rejected with a values-only-export instruction; no macros, formula evaluation, external-link resolution or password-protected workbooks are supported. Errors name the issue without echoing source values. Import warnings contain aggregate counts and fixed explanations.
+
+Known text fields preserve whitespace and nulls separately from normalized type/name keys. Raw payload retains all labeled source columns; unexpected date/time values in extra fields use tagged ISO representations. Object keys trim/collapse Unicode whitespace and uppercase case, retaining underscores, slashes and component delimiters. Blank identities remain null in normalized fields. Empty/formatting-only rows are skipped; populated rows with blank identities are retained with warnings. Integer `S.No` values are preserved and never treated as global IDs or interpreted as parent links. Manual status/comments are kept separate from tool status; they imply no automatic category, customer action or approval.
+
+For the same cycle/role, identical bytes return **HTTP 200**, `duplicate: true`, and the original metadata without adding rows. A new ingestion returns **HTTP 201**, `duplicate: false`. Different bytes for an occupied role return **HTTP 409**, `WORKBOOK_ROLE_OCCUPIED`; create a new cycle rather than replace evidence. Equality is byte/hash equality, so even a workbook metadata change can produce a conflict. Missing/malformed structure returns HTTP 422, unsupported extension HTTP 415, and size excess HTTP 413. Parse and persistence failures cannot leave partial source rows.
+
+**Raw evidence** records what the workbook actually said. **Normalized keys** prepare identities for later comparisons. **Reconciliation results** would describe matches and finding differences; they are not produced in Prompt 0.3. In particular, an absent report identity is not automatically an out-of-scope object under the shared-TR business rules.
+
 Readiness currently checks **connectivity**, not migration currency or write permissions. A connectable but unmigrated SQLite file can pass it. Always run migrations before development; schema-aware readiness can be added when application operations require it. SQLite may create an empty database file on the first connection if its parent directory exists; that does not create any application tables.
 
 Errors share an `error` object with `code`/`message` and a `request_id`. Responses carry `X-Request-ID` for troubleshooting. Application logs contain method, route template, status, duration and generated request ID. They omit request bodies, query strings, authorization headers, database URLs and exception messages. The command disables Uvicorn's separate access log to avoid its query-string output. No file logs are configured.
@@ -87,9 +168,31 @@ Errors share an `error` object with `code`/`message` and a `request_id`. Respons
 & .\backend\.venv\Scripts\python.exe -m pip check
 ```
 
-Tests use fresh databases under Pytest's temporary directory and explicitly bypass the real `.env`. They exercise health/readiness, unavailable databases, configuration precedence, CORS, error handling, request-log redaction, migration upgrade/downgrade, schema/model agreement, UUID persistence and UTC timestamps. They neither read nor write the company workbooks and never migrate the development database.
+Default tests use fresh databases under Pytest's temporary directory and explicitly bypass the real `.env`. They cover existing foundation behavior, normalization, adapters, validation, duplicate/conflict handling, transaction rollback after inserts, provenance, manual-field separation, pagination and source-value log redaction. They never require company files or migrate the development database.
 
-Verified on 2026-10-24 with Python 3.12.4: **25 tests passed**, `pip check` reported no broken requirements, the development database reached `0001_create_projects (head)`, and a real Uvicorn process served health/readiness, OpenAPI and Swagger successfully. The verification server was stopped afterward. The pinned Starlette version emits one upstream deprecation warning when its TestClient uses the requested HTTPX package; it does not affect the passing tests. No additional HTTP client was installed to suppress it.
+To run only the new portable ingestion checks:
+
+```powershell
+& .\backend\.venv\Scripts\python.exe -m pytest -c backend/pyproject.toml backend/tests/unit/test_normalization.py backend/tests/unit/test_importers.py backend/tests/integration/test_ingestion.py backend/tests/integration/test_portability.py -q
+```
+
+Confidential-file verification is a separate opt-in and must only run on a laptop with the approved originals:
+
+```powershell
+& .\backend\.venv\Scripts\python.exe -m pytest -c backend/pyproject.toml backend/tests/integration/test_local_samples.py --run-local-samples -q -s
+```
+
+Verified on 2026-10-24 with Python 3.12.4: the default suite has **67 passing tests and one intentionally skipped local-data check**; running the whole suite with `--run-local-samples` gives **68 passed**. `pip check` reported no broken requirements. A real Uvicorn process ingested both synthetic roles, returned duplicate HTTP 200, served paginated evidence and reported cycle status `complete`; its metadata log contained no source values. The verification server was stopped afterward. The upstream Starlette/HTTPX TestClient deprecation warning from Prompt 0.2 remains; tests pass.
+
+Actual local sample ingestion matched discovery exactly: `Detailed_LOG` **361**, `Objects` **205**, `Errors` **1,226**. Every raw payload and Excel row location was compared with the original, repeated identities were retained, and manual/tool fields were checked separately. All three original workbook hashes remained unchanged; the third workbook was hashed only, not ingested. This isolated local verification took about **2.23 seconds** including readback checks on the development laptop; it is not a measured review-time saving or matching-accuracy result.
+
+## Demo Portability Check
+
+- Source/configuration contains no fixed username, clone location or required existing virtual environment/database. Relative database paths resolve from the current clone; an override is configurable.
+- An automated check copies source/configuration into a fresh directory with spaces, without `.env`, company files, a database or a copied virtual environment. Using an interpreter with the declared dependencies installed, it migrates a new database and ingests synthetic files while outbound connections are blocked.
+- The synthetic generator and all default tests are source-controlled; generated `.xlsx`, logs, databases, real `.env` files and company workbooks stay ignored.
+- Initial cloning and dependency installation require access to GitHub/the package index. Ingestion and evidence retrieval need no internet once installed. Reconciliation and customer export remain unimplemented and will retain the offline requirement.
+- Remaining demo-machine steps: install the prerequisites, clone committed source, create/install its own environment, copy/configure `.env`, run `upgrade head`, generate synthetic files and start Uvicorn. An actual second laptop has not been exercised. No setup/launch automation or Docker was added.
 
 ## Folder responsibilities
 
@@ -97,12 +200,12 @@ Verified on 2026-10-24 with Python 3.12.4: **25 tests passed**, `pip check` repo
 - `app/core`: shared settings, safe error responses and request logging.
 - `app/api`: versioned router and HTTP endpoint handlers.
 - `app/schemas`: typed response shapes.
-- `app/db`: database connection/session helpers, the model base and `Project` model.
-- `app/services`: reserved for later business logic; no ingestion or matching yet.
-- `app/scripts`: existing read-only workbook discovery utility.
+- `app/db`: database connection/session helpers and project/cycle/workbook/evidence models.
+- `app/services`: normalization, separate sheet adapters and atomic ingestion persistence; no matching yet.
+- `app/scripts`: read-only discovery utility and fictional demo workbook generator.
 - `alembic`: version-controlled schema changes, separate from application startup.
 - `tests/unit` and `tests/integration`: isolated configuration and connected API/database checks.
-- `tests/fixtures`: reserved; current foundation tests need no workbook fixtures.
+- `tests/fixtures`: synthetic mutation helpers; test source data comes from the fictional generator.
 
 ## Troubleshooting
 
@@ -113,5 +216,11 @@ Verified on 2026-10-24 with Python 3.12.4: **25 tests passed**, `pip check` repo
 - **Invalid configuration:** use a supported environment/log level and valid SQLite URL; list settings need valid JSON.
 - **Port 8000 is occupied:** use `--port 8001` and update the URLs used to test it. Stop the foreground server with Ctrl+C.
 - **Network restrictions during installation:** dependency downloads require package-index access. Runtime health/readiness and tests work locally once dependencies are installed.
+- **Missing-sheet/header HTTP 422:** supply the verified source layout and correct workbook role; whitespace padding is accepted but semantic headers are not guessed.
+- **HTTP 413:** review configured file/expanded-size limits. Do not rename an unsupported format to `.xlsx`; the server checks the content.
+- **HTTP 409 after editing an Excel file:** use a new cycle; evidence replacement is intentionally unavailable.
+- **`curl` behaves like a PowerShell command:** use `curl.exe` explicitly, or upload through `/docs`. No PowerShell 7-only `-Form` syntax is required by the walkthrough.
 
 Implementation references: [FastAPI exception handling](https://fastapi.tiangolo.com/tutorial/handling-errors/), [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/), [SQLAlchemy timezone recipe](https://docs.sqlalchemy.org/en/20/core/custom_types.html#store-timezone-aware-timestamps-as-timezone-naive-utc), and [Alembic tutorial](https://alembic.sqlalchemy.org/en/latest/tutorial.html).
+
+Ingestion references: [FastAPI multipart forms/files](https://fastapi.tiangolo.com/tutorial/request-forms-and-files/), [OpenPyXL XML safety](https://openpyxl.readthedocs.io/en/stable/#security), [SQLAlchemy transaction handling](https://docs.sqlalchemy.org/en/20/orm/session_basics.html#framing-out-a-begin-commit-rollback-block).

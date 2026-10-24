@@ -5,7 +5,7 @@ import pytest
 from alembic import command
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
-from sqlalchemy import inspect, text
+from sqlalchemy import MetaData, inspect, text
 from sqlalchemy.exc import StatementError
 from sqlalchemy.orm import Session
 
@@ -15,7 +15,7 @@ from app.db.session import create_database_engine
 
 
 def test_initial_migration_creates_only_expected_schema(settings, migration_config):
-    command.upgrade(migration_config, "head")
+    command.upgrade(migration_config, "0001_create_projects")
     engine = create_database_engine(settings)
     try:
         inspector = inspect(engine)
@@ -27,11 +27,13 @@ def test_initial_migration_creates_only_expected_schema(settings, migration_conf
         assert all(not columns[name]["nullable"] for name in ("id", "name", "created_at", "updated_at"))
         with engine.connect() as connection:
             assert connection.scalar(text("SELECT version_num FROM alembic_version")) == "0001_create_projects"
-            assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
-        command.upgrade(migration_config, "head")  # repeated upgrades must be safe
+            initial_metadata = MetaData()
+            Project.__table__.to_metadata(initial_metadata)
+            assert compare_metadata(MigrationContext.configure(connection), initial_metadata) == []
+        command.upgrade(migration_config, "0001_create_projects")  # repeated upgrades must be safe
         command.downgrade(migration_config, "base")
         assert "projects" not in inspect(engine).get_table_names()
-        command.upgrade(migration_config, "head")
+        command.upgrade(migration_config, "0001_create_projects")
         assert "projects" in inspect(engine).get_table_names()
     finally:
         engine.dispose()

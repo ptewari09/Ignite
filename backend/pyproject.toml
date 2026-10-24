@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tracesync-backend"
 version = "0.1.0"
-description = "TraceSync API backend foundation"
+description = "TraceSync API with local workbook ingestion and evidence persistence"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115,<1",
@@ -16,6 +16,8 @@ dependencies = [
   "alembic>=1.13,<2",
   "openpyxl>=3.1.5,<4",
   "pandas>=2.2,<3",
+  "python-multipart>=0.0.20,<1",
+  "defusedxml>=0.7.1,<1",
 ]
 
 [project.optional-dependencies]

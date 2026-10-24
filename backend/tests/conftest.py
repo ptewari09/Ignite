@@ -10,6 +10,13 @@ from app.core.config import Settings
 from app.main import create_app
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run-local-samples", action="store_true", default=False,
+        help="Opt in to local confidential-workbook verification; never required for portable tests",
+    )
+
+
 @pytest.fixture(autouse=True)
 def isolate_environment(monkeypatch):
     for key in list(os.environ):

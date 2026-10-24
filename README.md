@@ -2,7 +2,7 @@
 
 TraceSync helps transformation leads compare an initial transformation report with a post-upload report, inspect the supporting messages, and prepare a reviewed customer Excel report. Today this involves manually mapping objects and errors between spreadsheets. The intended application preserves that evidence while reducing repetitive copying and comparison.
 
-**Current stage: Prompt 0.2 — backend foundation, completed on 2026-10-24.** Prompt 0.1 workbook discovery is preserved. The backend now provides `TraceSync API`, health/readiness endpoints, validated settings, request metadata logging, consistent errors, SQLAlchemy sessions and one Alembic migration for `Project`. Workbook ingestion, reconciliation, UI, export and AI are not implemented.
+**Current stage: Prompt 0.3 — Excel ingestion and evidence persistence, completed on 2026-10-24.** The backend manages projects/cycles, ingests the two verified source roles transactionally and returns paginated raw evidence with normalized keys and source-row provenance. Health/readiness and the discovery utility remain available. Reconciliation, UI, customer export and AI are not implemented.
 
 ## Intended workflow
 
@@ -24,7 +24,7 @@ The existing customer workbook is a format/evaluation reference. Ordinary proces
 | Verification | pytest/httpx; Vitest/React Testing Library | Check processing, API and important UI behavior |
 | Later options | Docker Compose; PostgreSQL; approved AI provider | Reproducible demo, shared deployment, optional explanations |
 
-Python, FastAPI/Uvicorn, Pydantic/Pydantic Settings, SQLAlchemy/Alembic, SQLite, OpenPyXL/pandas and Pytest/HTTPX are installed in the backend's isolated environment. Frontend and later deployment/AI choices remain proposed. Discovery used the previously available Python/OpenPyXL; no customer workbook was uploaded externally. The implemented foundation works locally.
+Python, FastAPI/Uvicorn, Pydantic/Pydantic Settings, SQLAlchemy/Alembic, SQLite, OpenPyXL/pandas, multipart/XML-safety dependencies and Pytest/HTTPX are declared and installed in the backend's isolated environment. Frontend and later deployment/AI choices remain proposed. No customer workbook was uploaded externally. Ingestion works locally without internet once dependencies are installed.
 
 ## Repository layout
 
@@ -37,13 +37,13 @@ backend/
   app/
     main.py       # TraceSync API application factory and entry point
     core/         # settings, exception handlers and request logging
-    api/          # /api/v1/health and /api/v1/ready
-    db/           # engine, sessions, base and Project model
-    schemas/      # health/readiness response contracts
-    services/     # future processing logic
-    scripts/      # read-only workbook inspection utility
+    api/          # health, projects, cycles, workbook upload and evidence retrieval
+    db/           # engine, sessions, projects/cycles and source-evidence tables
+    schemas/      # validated API request/response contracts
+    services/     # separate parsers, normalization and transactional persistence
+    scripts/      # inspection utility and fictional demo workbook generator
   tests/
-    fixtures/     # reserved for future synthetic test inputs
+    fixtures/     # synthetic workbook/API test helpers
     unit/
     integration/
 frontend/
@@ -60,7 +60,9 @@ docs/
 data/
   README.md
   sample_files/   # existing internal workbooks; ignored by Git
-  outputs/        # local inspection results; ignored by Git
+  local/          # configurable local database; ignored by Git
+  demo/           # generated fictional workbooks; ignored by Git
+  outputs/        # local inspection/verification output; ignored by Git
 ```
 
 `.gitkeep` files allow Git to retain otherwise empty folders. The repository already existed; it was preserved. No commit was made.
@@ -90,9 +92,9 @@ The utility assumes the inspected tabular sheets use row 1 for headers. It repor
 - [Business rules](docs/mapping-rules.md): dated user-confirmed guidance and remaining interpretation limits.
 - [Questions for seniors](docs/SENIOR_QUESTIONS.md): current priorities and a question list for each build stage.
 - [Original project reference](docs/Project_Reference.md): broader proposed specification; unchanged.
-- [Backend setup](backend/README.md): exact PowerShell install, migration, server and test commands; verified Prompt 0.2 results.
+- [Backend setup](backend/README.md): fresh-clone Windows prerequisites, installation/migrations, synthetic ingestion walkthrough, endpoint contract and verified Prompt 0.3 results.
 
-Next is a separately authorized ingestion task using the verified layouts. Message-block linkage and unresolved report rules remain visible questions; they do not prevent preserving source rows. Prompt 0.2 stops before ingestion.
+Default tests use generated fictional workbooks and fresh temporary databases, so another Windows clone does not need company data or an existing database. See the backend README's Demo Portability Check. Next is a separately authorized reconciliation task; message-block linkage, scope evidence and unresolved report rules remain review questions. Prompt 0.3 stops before matching.
 
 ## Local data and Git
 

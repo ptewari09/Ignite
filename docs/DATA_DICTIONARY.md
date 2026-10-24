@@ -193,4 +193,12 @@ Future raw records need source-file identity, role, sheet, Excel row, raw payloa
 - C `Error details` contains 980 custom-height row-dimension entries, including formatting outside its 153 records. Counting row dimensions or styled cells would inflate record counts.
 - No cached-formula question arises in these files because there are no worksheet formulas. A normal workbook load does not calculate or refresh pivot tables. Future importers must detect formula-bearing fields and avoid assuming cached results are current.
 
-See [RECONCILIATION_DISCOVERY.md](RECONCILIATION_DISCOVERY.md) for proposed matching behavior and unresolved questions. No importer adapter, message-linking rule or reconciliation engine is implemented in this step.
+See [RECONCILIATION_DISCOVERY.md](RECONCILIATION_DISCOVERY.md) for proposed matching behavior and unresolved questions. The discovery observations above are preserved. Prompt 0.3 subsequently implements the three source adapters; message-linking rules and reconciliation remain unimplemented.
+
+## Prompt 0.3 ingestion mapping
+
+The verified A/B source fields now have explicit nullable raw columns in `transformation_findings`, `upload_objects` and `upload_errors`, plus separate normalized type/name columns. Every record retains workbook ID, worksheet, original Excel row and a JSON `raw_payload` whose keys preserve original headers. Manual status/comments are separate columns from tool status and are not copied into categories or approval fields. Missing/whitespace identities remain null only in normalized keys; raw whitespace is retained.
+
+All documented headers for each supplied layout are required, including the annotated `Objects` manual fields. Header whitespace may vary; missing semantic fields or duplicate normalized headers cause a clear import error. Additional labeled columns are preserved. Unknown date/time extra values use tagged ISO JSON representations. Formula/error cells are rejected rather than trusting cached results. Summary tabs are not required or parsed. No parser creates parent links or infers the meaning of `S.No` blocks.
+
+Verification against the originals stored 361 / 205 / 1,226 rows and compared every raw payload and physical row number; repeated identifiers and separate manual fields were preserved. All three file hashes remained unchanged. The customer reference was checked for unchanged bytes only and was not an ingestion input. See [backend/README.md](../backend/README.md) for endpoints, validation policy and portable synthetic verification.
