@@ -1,0 +1,28 @@
+# Internal company datasets — NEVER commit
+# Confidential company datasets
+/data/sample_files/
+
+# Generated reports
+/data/outputs/
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Node.js
+node_modules/
+dist/
+
+# Generated reports
+/data/outputs/
