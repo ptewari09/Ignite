@@ -1,17 +1,17 @@
 # TraceSync implementation plan
 
-## Updated frontend sequence — Prompt 0.4A
+## Updated frontend sequence — Prompt 0.5
 
-**Current refinement: Prompt 0.4A.1.** Replace the static Overview introduction with a compact welcome, reusable interactive educational guide, useful empty state and concise workflow explanation. Guide progress is local reader state, never actual project progress. Hide Reconciliation and Smart Blocker Radar from navigation while preserving their routes/plans; remove the sidebar signoff. Preserve the existing stack and backend. Verify component/browser behavior, TypeScript, ESLint and production build before stopping for visual review. Prompt 0.4B remains separately authorized work.
+**Current milestone: Prompt 0.5 — Projects and Upload Cycles.** Replace only the Projects placeholder with real paginated project/cycle retrieval and creation through the four existing FastAPI endpoints. Share validated fetched metadata and selected IDs in React memory; changing projects clears the active cycle. The header and compact Overview reflect selection. Preserve the five-item navigation, hidden Reconciliation/Radar routes, educational onboarding, design tokens and backend. Stop for visual and functional review before implementing another screen.
 
-The user has authorized incremental frontend development after successful backend Prompt 0.3A acceptance testing. This sequence supersedes the older recommendation below to implement reconciliation next.
+The user has authorized incremental frontend development after successful backend Prompt 0.3A acceptance testing. Prompt 0.5 follows the completed foundation, onboarding and palette milestones and supersedes the older recommendation below to implement reconciliation next. It does not authorize the full Overview dashboard, upload UI, evidence tables, reconciliation, reports, AI or authentication.
 
 - Prompt 0.4A provides only the React/TypeScript/Vite/Tailwind foundation, shared responsive navigation, minimal Overview, consistent future-screen placeholders and an unused typed API client. The backend remains unchanged.
 - Verify component behavior, real desktop/mobile rendering, keyboard navigation, TypeScript, production build and the backend suite. See [frontend/README.md](../frontend/README.md) for Windows commands.
 - Leave a local development preview available for visual review. Do not automatically commit or push.
 - Prompt 0.4B is the functional Overview and requires visual approval first. Each later screen is a separate milestone. No reconciliation, upload UI, evidence tables, reports, AI or authentication is authorized by Prompt 0.4A.
 
-Plan based on [Project_Reference.md](Project_Reference.md) and the inspected schemas. Updated on 2026-10-24 for a solo developer. Prompt 0.1 discovery, Prompt 0.2 foundation and Prompt 0.3 ingestion are complete. Reconciliation and later business workflows remain future work.
+Plan based on [Project_Reference.md](Project_Reference.md) and the inspected schemas. Updated on 2026-10-25 for a solo developer. Prompt 0.1 discovery, Prompt 0.2 foundation and Prompt 0.3 ingestion are complete. Prompt 0.5 adds only frontend Projects/Cycles integration. Reconciliation and later business workflows remain future work.
 
 ## Current boundary — Prompt 0.3 ingestion complete
 
@@ -21,7 +21,7 @@ Plan based on [Project_Reference.md](Project_Reference.md) and the inspected sch
 - Added fictional source-controlled generators, synthetic parser/API tests and a source-copy portability test with a fresh migrated database and outbound connections blocked. Default suite: 67 passed, one opt-in company-data check skipped. The full suite with local verification enabled passed all 68 tests, including counts 361 / 205 / 1,226 and unchanged originals.
 - Documented fresh Windows setup, configurable limits, synthetic upload/retrieval commands and the remaining second-laptop setup steps in [backend/README.md](../backend/README.md). Initial package installation needs network; ingestion does not. No Docker or setup/launch automation was added.
 
-The next separately authorized stage is reconciliation. Prompt 0.3 does not approve customer actions, infer scope from source absence, group blockers, build UI or generate reports.
+Prompt 0.3 did not approve customer actions, infer scope from source absence, group blockers, build UI or generate reports. The subsequent frontend scope is described above; reconciliation remains deferred.
 
 ## Prompt 0.2 backend foundation complete
 

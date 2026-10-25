@@ -1,6 +1,7 @@
 import { ArrowRight, ChevronRight, ClipboardCheck, Files, FileSpreadsheet, FileUp, FolderOpen, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router';
 import { GettingStartedGuide } from '../components/onboarding/GettingStartedGuide';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 
 const steps = [
   { label: 'Upload reports', icon: FileUp },
@@ -10,6 +11,7 @@ const steps = [
 ];
 
 export function OverviewPage() {
+  const { selectedProject, selectedCycle } = useWorkspace();
   return (
     <div className="page-content overview-page">
       <section className="overview-introduction" aria-labelledby="overview-heading">
@@ -21,8 +23,8 @@ export function OverviewPage() {
 
       <section className="project-empty-card" aria-labelledby="empty-heading">
         <span className="project-empty-icon"><FolderOpen size={23} strokeWidth={1.6} aria-hidden="true" /></span>
-        <div className="project-empty-copy"><h2 id="empty-heading">No project selected</h2><p>Your project’s reports, review cycles and source evidence will appear here.</p><span>Project selection is coming soon. The guide above explains how to get started.</span></div>
-        <Link className="secondary-button project-preview-link" to="/projects">View projects<ArrowRight size={15} aria-hidden="true" /></Link>
+        <div className="project-empty-copy"><h2 id="empty-heading">{selectedProject?.name ?? 'No project selected'}</h2><p>{selectedProject ? `Upload cycle: ${selectedCycle?.name ?? 'No cycle selected'}` : 'Choose a project and an upload cycle to set your workspace.'}</p><span>{selectedProject ? 'Manage your workspace on the Projects screen.' : 'The guide above explains the workflow. Open Projects to get started.'}</span></div>
+        <Link className="secondary-button project-preview-link" to="/projects">{selectedProject ? 'Manage workspace' : 'View projects'}<ArrowRight size={15} aria-hidden="true" /></Link>
       </section>
 
       <section className="review-workflow" aria-labelledby="workflow-heading">

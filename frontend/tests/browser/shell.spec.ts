@@ -7,6 +7,13 @@ const routes = [
   ['Customer Reports', '/customer-reports'],
 ];
 
+test.beforeEach(async ({ page }) => {
+  // Shell checks use a controlled empty directory, independently of FastAPI.
+  await page.route('**/api/v1/projects?**', (route) => route.fulfill({
+    json: { items: [], total: 0, limit: 200, offset: 0 },
+  }));
+});
+
 test('desktop shell renders, all links navigate, and direct routes survive reload', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   const errors: string[] = [];
@@ -31,7 +38,8 @@ test('desktop shell renders, all links navigate, and direct routes survive reloa
     await navigation.getByRole('link', { name, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(path + '$'));
     await expect(page.getByRole('heading', { name, level: 1, exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'This screen is not available yet' })).toBeVisible();
+    if (path === '/projects') await expect(page.getByRole('heading', { name: 'No projects yet' })).toBeVisible();
+    else await expect(page.getByRole('heading', { name: 'This screen is not available yet' })).toBeVisible();
     await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
     await expect(navigation.getByRole('link', { name, exact: true })).toHaveAttribute('aria-current', 'page');
   }
@@ -42,7 +50,8 @@ test('desktop shell renders, all links navigate, and direct routes survive reloa
   await page.mouse.move(900, 80);
   await page.screenshot({ path: 'test-results/overview-desktop.png', fullPage: true, animations: 'disabled' });
   expect(errors).toEqual([]);
-  expect(apiRequests).toEqual([]);
+  expect(apiRequests.length).toBeGreaterThan(0);
+  expect(apiRequests.every((url) => new URL(url).pathname === '/api/v1/projects')).toBe(true);
 });
 
 test('mobile dialog traps focus, closes with Escape/backdrop/navigation, and restores focus', async ({ page }) => {

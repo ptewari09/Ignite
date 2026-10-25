@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { App } from '../src/App';
 import { navigationItems } from '../src/components/navigation';
+import { fixtureApi } from './fixtures/workspace';
 
 function renderApp(path = '/overview') {
   return render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
@@ -49,13 +50,15 @@ describe('TraceSync application shell', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it.each(navigationItems.filter((item) => item.path !== '/overview'))('navigates to the $label placeholder with one active link', async ({ label }) => {
+  it.each(navigationItems.filter((item) => item.path !== '/overview'))('navigates to $label with one active link', async ({ label }) => {
+    fixtureApi([]);
     const user = userEvent.setup();
     renderApp();
     const navigation = screen.getByRole('navigation', { name: 'Primary navigation' });
     await user.click(within(navigation).getByRole('link', { name: label }));
     expect(screen.getByRole('heading', { level: 1, name: label })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'This screen is not available yet' })).toBeInTheDocument();
+    if (label === 'Projects') expect(await screen.findByText('No projects yet')).toBeInTheDocument();
+    else expect(screen.getByRole('heading', { name: 'This screen is not available yet' })).toBeInTheDocument();
     expect(within(navigation).getByRole('link', { name: label })).toHaveClass('nav-link-active');
     expect(navigation.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
     expect(document.title).toBe(`${label} | TraceSync`);
@@ -86,6 +89,7 @@ describe('TraceSync application shell', () => {
   });
 
   it('closes the mobile menu when navigating', async () => {
+    fixtureApi([]);
     const user = userEvent.setup();
     renderApp();
     await user.click(screen.getByRole('button', { name: 'Open navigation' }));

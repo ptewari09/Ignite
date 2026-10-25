@@ -2,13 +2,13 @@
 
 TraceSync helps transformation leads compare an initial transformation report with a post-upload report, inspect the supporting messages, and prepare a reviewed customer Excel report. Today this involves manually mapping objects and errors between spreadsheets. The intended application preserves that evidence while reducing repetitive copying and comparison.
 
-**Current stage: Prompt 0.4A.1 — Overview refinement and interactive onboarding.** Backend Prompt 0.3A acceptance testing passed. The backend manages projects/cycles, ingests both source roles transactionally and returns paginated evidence with provenance. The independently runnable frontend provides a responsive shell, compact Overview, educational guide and future-screen placeholders. Backend-connected frontend screens, reconciliation, customer export and AI remain future work.
+**Current stage: Prompt 0.5 — functional Projects and Upload Cycles.** The frontend now lists/creates projects and their cycles through the existing FastAPI API, with shared workspace selection across routes. The responsive shell, compact Overview, educational guide and blue/white/red-violet design system are preserved. The backend manages projects/cycles, ingests both source roles transactionally and returns paginated evidence with provenance. Upload UI, evidence tables, reconciliation, customer export and AI remain future work.
 
 ## Intended workflow
 
 Upload two source workbooks → validate their layouts → associate objects and messages → review findings → approve customer entries → export Excel.
 
-The user defines `Out of scope` as an object absent from the TR shared with Smartshift, which the company currently cannot see or access in this workflow. These objects must reach the customer for revalidation and a decision on access before the second run. They remain part of the reviewed reporting workflow. See BR-001 and BR-002 in [Business rules](docs/mapping-rules.md) for the confirmed requirements and open process details.
+The user defines `Out of scope` as an object absent from the TR shared with the transformation team, which currently cannot see or access that object in this workflow. These objects must reach the customer for revalidation and a decision on access before the second run. They remain part of the reviewed reporting workflow. See BR-001 and BR-002 in [Business rules](docs/mapping-rules.md) for the confirmed requirements and open process details.
 
 The existing customer workbook is a format/evaluation reference. Ordinary processing will use the two source workbooks. Matching the same object does not establish that its errors match or that remediation succeeded. Smart Blocker Radar will later suggest shared blockers only when actual messages support a shared identifier.
 
@@ -48,7 +48,7 @@ backend/
     integration/
 frontend/
   package.json / package-lock.json
-  src/{layouts,components,pages,services,types,styles}/
+  src/{layouts,components,contexts,pages,services,types,styles}/
   tests/         # component/API-client and real-browser navigation checks
 docs/
   Project_Reference.md
@@ -94,9 +94,9 @@ The utility assumes the inspected tabular sheets use row 1 for headers. It repor
 - [Questions for seniors](docs/SENIOR_QUESTIONS.md): current priorities and a question list for each build stage.
 - [Original project reference](docs/Project_Reference.md): broader proposed specification; unchanged.
 - [Backend setup](backend/README.md): fresh-clone Windows prerequisites, installation/migrations, synthetic ingestion walkthrough, endpoint contract and verified Prompt 0.3 results.
-- [Frontend setup](frontend/README.md): Node 24 prerequisites, exact Windows installation/start/test/build commands and Prompt 0.4A routes.
+- [Frontend setup](frontend/README.md): Node 24 prerequisites, exact two-terminal Windows backend/frontend commands, project/cycle workflow and controlled/live browser checks.
 
-Default backend tests use fictional workbooks and fresh temporary databases. Frontend shell/onboarding tests need no company data, database or backend. Development proceeds one screen at a time: Prompt 0.4A.1 refines the landing page before a separately authorized functional Overview in Prompt 0.4B. Message-block linkage, scope evidence and unresolved report rules remain review questions for later reconciliation work.
+Default backend tests use fictional workbooks and fresh temporary databases. Frontend component and controlled browser tests need no company data or backend. An opt-in live browser test verifies actual FastAPI HTTP requests using fictional projects/cycles in an isolated migrated database. See the frontend README for setup and results. Development proceeds one screen at a time; Prompt 0.5 stops at Projects/Cycles for visual and functional review. Message-block linkage, scope evidence and unresolved report rules remain review questions for later reconciliation work.
 
 ## Local data and Git
 

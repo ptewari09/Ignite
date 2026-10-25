@@ -31,7 +31,7 @@ One object can have many messages, and one message can discuss a component of a 
 
 You clarified that out-of-scope objects must be reported to the customer for revalidation and a decision on access before the second run. This gives us a concrete business requirement: retain those entries in the reviewed customer-report workflow, with an explanation/request approved by the reviewer.
 
-You then defined `Out of scope`: the object is not present in the TR shared with Smartshift, so your company currently cannot see or access it in this workflow. This is recorded as BR-002 in [mapping-rules.md](mapping-rules.md). The app would need authoritative TR-membership evidence or a reviewed decision to apply this definition. An object missing from one of our two Excel reports is not enough evidence of absence from that TR.
+You then defined `Out of scope`: the object is not present in the TR shared with the transformation team, so the team currently cannot see or access it in this workflow. This is recorded as BR-002 in [mapping-rules.md](mapping-rules.md). The app would need authoritative TR-membership evidence or a reviewed decision to apply this definition. An object missing from one of our two Excel reports is not enough evidence of absence from that TR.
 
 For an imaginary out-of-scope object, the report can ask the customer to revalidate it and decide whether to provide access. You confirmed that customers usually add it to the shared TR or provide another TR (BR-003). Approving that report internally only approves what we communicate. It does not establish that the customer has made the change or that access is available. Who decides, what proves availability, and how to handle a denial or missing response remain questions for your seniors.
 

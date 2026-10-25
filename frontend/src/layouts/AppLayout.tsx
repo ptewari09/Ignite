@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { ChevronRight, Folder, Menu, X } from 'lucide-react';
-import { Outlet, useLocation } from 'react-router';
+import { Link, Outlet, useLocation } from 'react-router';
 import { Sidebar } from '../components/Sidebar';
 import { applicationRoutes } from '../components/navigation';
+import { useWorkspace } from '../contexts/WorkspaceContext';
 
 export function AppLayout() {
+  const { selectedProject, selectedCycle } = useWorkspace();
+  const workspaceLabel = selectedProject
+    ? `${selectedProject.name} / ${selectedCycle?.name ?? 'No cycle selected'}` : 'No project selected';
   const { pathname } = useLocation();
   const title = applicationRoutes.find((item) => item.path === pathname)?.label ?? 'Page not found';
   const [menuOpen, setMenuOpen] = useState(false);
@@ -81,7 +85,7 @@ export function AppLayout() {
             </button>
             <div className="header-breadcrumb"><span className="breadcrumb-root">Workspace</span><ChevronRight size={14} aria-hidden="true" /><span className="header-title">{title}</span></div>
           </div>
-          <span className="project-context"><Folder size={15} strokeWidth={1.7} aria-hidden="true" /><span className="project-context-full">No project selected</span><span className="project-context-short">No project</span></span>
+          <Link className="project-context" to="/projects" title={workspaceLabel} aria-label={`Manage workspace: ${workspaceLabel}`}><Folder size={15} strokeWidth={1.7} aria-hidden="true" /><span className="project-context-full">{workspaceLabel}</span><span className="project-context-short">{selectedProject?.name ?? 'No project'}</span></Link>
         </header>
         <main ref={mainRef} id="main-content" className="main-content" tabIndex={-1}>
           <Outlet />

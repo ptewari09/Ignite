@@ -36,11 +36,11 @@ These examples specify future checks, not existing executable tests. The eight o
 
 Use the current-stage questions in [SENIOR_QUESTIONS.md](SENIOR_QUESTIONS.md) to clarify authoritative TR-membership evidence, label ownership, required access, decision authority, response evidence and next-run handling. Export layout and recheck relationships are covered under Milestone 4 there.
 
-## BR-002 — out-of-scope definition uses the TR shared with Smartshift
+## BR-002 — out-of-scope definition uses the TR shared with the transformation team
 
 **Status:** definition confirmed by the user on 2026-10-24, answering the definition portion of Q0.1. Who assigns the label and how membership is verified remain open.
 
-**Definition:** an object is `Out of scope` when it is not present in the TR shared with Smartshift. The user explains that Smartshift currently cannot see or access that object in this workflow. BR-001 requires reporting it to the customer for revalidation and an access decision before the second run.
+**Definition:** an object is `Out of scope` when it is not present in the TR shared with the transformation team. The team currently cannot see or access that object in this workflow. BR-001 requires reporting it to the customer for revalidation and an access decision before the second run.
 
 This is the user's business definition for this project. It is not a general SAP permission rule. The actual shared-TR object inventory and a verified method for comparing parent/component identities have not been established from the supplied workbooks.
 
@@ -74,7 +74,7 @@ For future reviewed reports, a lead can request the appropriate TR addition/prov
 | Version | Date | Source | Change |
 |---|---|---|---|
 | 0.1 | 2026-10-24 | User clarification in this conversation | Added BR-001: customer reporting of out-of-scope objects for revalidation/access decision before the second run |
-| 0.2 | 2026-10-24 | User answer to Q0.1 in this conversation | Added BR-002: object absent from the TR shared with Smartshift; current visibility/access unavailable in this workflow |
+| 0.2 | 2026-10-24 | User answer to Q0.1 in this conversation | Added BR-002: object absent from the TR shared with the transformation team; current visibility/access unavailable in this workflow |
 | 0.3 | 2026-10-24 | User answer to Q0.2 in this conversation | Added BR-003: customers usually add the object to the shared TR or provide another TR |
 
 For each future answer, record the question ID, answer, person/role, date, an example and rule impact. Label provisional interpretations explicitly. Update affected documentation and plan an acceptance check before implementing a rule.

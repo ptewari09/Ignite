@@ -1,0 +1,54 @@
+import { expect, test } from '@playwright/test';
+
+// Opt-in: this test writes fictional projects/cycles to a real local FastAPI.
+// Use a separately migrated test database as documented in frontend/README.md.
+test('live FastAPI persists project/cycle creation through the browser', async ({ page, request }) => {
+  const api = process.env.TRACESYNC_LIVE_API_URL?.replace(/\/$/, '');
+  test.skip(!api, 'Set TRACESYNC_LIVE_API_URL and start an isolated FastAPI backend to run this integration test.');
+  if (!api) return;
+  const suffix = Date.now();
+  const projectName = `Synthetic acceptance ${suffix}`;
+  const cycleName = `Acceptance run ${suffix}`;
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const readiness = await request.get(`${api}/ready`);
+  expect(readiness.status()).toBe(200);
+  expect(await readiness.json()).toMatchObject({ service: 'TraceSync API', status: 'ready' });
+  await page.goto('/projects');
+  await page.getByRole('button', { name: 'New project', exact: true }).click();
+  await page.getByLabel('Project name', { exact: false }).fill(projectName);
+  await page.getByLabel('Description', { exact: false }).fill('Fictional browser acceptance data; no customer records.');
+  const projectResponse = page.waitForResponse((response) => response.url() === `${api}/projects` && response.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Create project', exact: true }).click();
+  const projectHttp = await projectResponse;
+  expect(projectHttp.status()).toBe(201);
+  expect(projectHttp.headers()['access-control-allow-origin']).toBe('http://127.0.0.1:5173');
+  expect(projectHttp.headers()['x-request-id']).toBeTruthy();
+  const project = await projectHttp.json() as { id: string; name: string };
+  expect(project.name).toBe(projectName);
+  await expect(page.getByRole('heading', { name: 'No upload cycles yet' })).toBeVisible();
+  await page.getByRole('button', { name: 'New cycle', exact: true }).click();
+  await page.getByLabel('Cycle name', { exact: false }).fill(cycleName);
+  const cycleResponse = page.waitForResponse((response) => response.url() === `${api}/projects/${project.id}/cycles` && response.request().method() === 'POST');
+  await page.getByRole('button', { name: 'Create cycle', exact: true }).click();
+  const cycleHttp = await cycleResponse;
+  expect(cycleHttp.status()).toBe(201);
+  const cycle = await cycleHttp.json() as { id: string; project_id: string; ingestion_status: string };
+  expect(cycle.project_id).toBe(project.id);
+  expect(cycle.ingestion_status).toBe('empty');
+  await expect(page.getByRole('link', { name: `Manage workspace: ${projectName} / ${cycleName}` })).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: 'test-results/projects-live-desktop.png', fullPage: true, animations: 'disabled' });
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/projects-live-320.png', fullPage: true, animations: 'disabled' });
+  await page.reload();
+  await expect(page.getByRole('link', { name: 'Manage workspace: No project selected' })).toBeVisible();
+  await page.getByRole('button', { name: `Select project ${projectName}` }).click();
+  await expect(page.getByRole('button', { name: `Select cycle ${cycleName}` })).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: `Select cycle ${cycleName}` }).click();
+  const persisted = await request.get(`${api}/projects/${project.id}/cycles`);
+  expect((await persisted.json()).items).toContainEqual(expect.objectContaining({ id: cycle.id, project_id: project.id, name: cycleName }));
+  expect(errors).toEqual([]);
+});

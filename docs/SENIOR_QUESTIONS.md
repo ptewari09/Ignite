@@ -2,7 +2,7 @@
 
 Prepared on **2026-10-24**. Use this as a discussion checklist: take the questions for the current stage first, record answers, then revisit the next group when that stage begins. There is no need to resolve every future feature before building ingestion.
 
-**Already clarified by the user:** an out-of-scope object is absent from the TR shared with Smartshift, so the company currently cannot see or access it in this workflow. It must be included in the customer-report workflow for revalidation and an access decision before the second run. Customers usually add it to the shared TR or provide another TR. See BR-001 through BR-003 in [mapping-rules.md](mapping-rules.md). Membership evidence, label ownership, decision authority and exception handling still need clarification.
+**Already clarified by the user:** an out-of-scope object is absent from the TR shared with the transformation team, so the team currently cannot see or access it in this workflow. It must be included in the customer-report workflow for revalidation and an access decision before the second run. Customers usually add it to the shared TR or provide another TR. See BR-001 through BR-003 in [mapping-rules.md](mapping-rules.md). Membership evidence, label ownership, decision authority and exception handling still need clarification.
 
 At each stage, we will identify the relevant unanswered questions, explain what each answer changes, record your seniors' answers with their source/date, and distinguish decisions needed now from details that can wait. Questions alone are not new implementation requirements or authorization to advance milestones.
 
@@ -10,7 +10,7 @@ At each stage, we will identify the relevant unanswered questions, explain what 
 
 Track the answers here and take the remaining points to your seniors:
 
-1. **Q0.1 — Scope criteria (definition answered):** User answer, 2026-10-24: an object is out of scope when it is not present in the TR shared with Smartshift, so the company currently cannot see or access it. See BR-002. **Remaining process questions:** who assigns the label, and which authoritative TR object list or other verified evidence confirms membership?
+1. **Q0.1 — Scope criteria (definition answered):** User answer, 2026-10-24: an object is out of scope when it is not present in the TR shared with the transformation team, so the team currently cannot see or access it. See BR-002. **Remaining process questions:** who assigns the label, and which authoritative TR object list or other verified evidence confirms membership?
 2. **Q0.2 — Requested access (usual mechanism answered):** User answer, 2026-10-24: customers mostly add the object to the shared TR or provide another TR. See BR-003. **Remaining process questions:** what evidence should the report provide, and what confirms that the TR change/access is available before the second run?
 3. **Q0.3 — Customer decision:** Who on the customer side can approve or deny the request, and how is that decision communicated and recorded today?
 4. **Q0.4 — Second run:** If access is denied or the customer has not responded, does the second run skip only those objects, wait entirely, or follow another process? Is actual access checked separately from customer approval?

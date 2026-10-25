@@ -1,6 +1,6 @@
 # TraceSync frontend
 
-Prompt 0.4A.1 refines the existing shell with a compact Overview and an interactive Getting Started guide. The five visible navigation entries lead to Overview and four future-screen placeholders; two hidden future routes remain available directly. The existing framework setup and unused typed API client are preserved. There are no project/cycle operations, uploads, evidence tables, reconciliation, approvals, reports, authentication or AI. The frontend starts without a backend or database and makes no API requests.
+Prompt 0.5 makes **Projects and Upload Cycles** functional using the existing FastAPI endpoints. Users can list/create projects, list/create a project's cycles and select a shared workspace. The five visible navigation entries, compact Overview, educational Getting Started guide and blue/white/red-violet design system are preserved. The three remaining visible future screens and two hidden future routes are placeholders. Upload UI, evidence tables, reconciliation, approval, reporting, authentication and AI remain future work.
 
 Prompt 0.4A.2 applies the shared blue, white and red-violet palette to that existing interface. It changes presentation only, with no new dependencies or changes to routes, onboarding behavior or the API client.
 
@@ -13,7 +13,7 @@ node --version
 npm.cmd --version
 ```
 
-If Node 18 or 22 is reported, switch to Node 24 before installing. The current stable router and DOM test environment require a newer runtime than the original laptop's default Node 18. This project does not change global Node/npm installations. PowerShell 5.1+ works; `npm.cmd` avoids execution-policy restrictions on `npm.ps1`. Python, Excel, Docker and a running backend are not needed here.
+If Node 18 or 22 is reported, switch to Node 24 before installing. The current stable router and DOM test environment require a newer runtime than the original laptop's default Node 18. This project does not change global Node/npm installations. PowerShell 5.1+ works; `npm.cmd` avoids execution-policy restrictions on `npm.ps1`. The Projects workflow also needs **Python 3.12** and the local FastAPI server, as described below. Excel and Docker are unnecessary. Overview and placeholders render without a backend; Projects shows a recoverable connection error if the API is unavailable.
 
 ## Install and start after cloning
 
@@ -39,7 +39,45 @@ Open **http://127.0.0.1:5173/**. Vite redirects the app root to `/overview`, bin
 
 Use `npm ci` on another laptop to reproduce the application lockfile and `npm ci --prefix tools/lint` to reproduce the lint-tool lockfile. Do not transfer either `node_modules` directory, local `.env` files, databases or company workbooks. No commit or push is made by this milestone; include both manifests/lockfiles and source in your own reviewed commit before cloning elsewhere.
 
-Installation initially needs npm-registry access. Installed assets use system fonts and bundled icons, without remote fonts, CDNs or runtime internet dependencies. No Docker or setup/deployment infrastructure was added.
+Installation initially needs npm-registry access. Installed assets use system fonts and bundled icons, without remote fonts or CDNs. Projects calls the local API; no external service or runtime internet connection is needed after dependencies are installed. No Docker or setup/deployment infrastructure was added.
+
+## Run backend and frontend together
+
+Use **two separate PowerShell terminals**, both initially opened in the clone root. These commands work with repository-relative paths and a newly created database. They need no confidential workbooks. First install/select Python 3.12 and Node 24 as documented here and in [backend setup](../backend/README.md).
+
+**Terminal 1: FastAPI.** Install dependencies on first setup, then apply the existing migrations before starting the API:
+
+```powershell
+if (-not (Test-Path -LiteralPath 'backend/.venv/Scripts/python.exe')) {
+    py -3.12 -m venv backend/.venv
+}
+& .\backend\.venv\Scripts\python.exe -m pip install -c backend/requirements-dev.lock -e './backend[dev]'
+if ($LASTEXITCODE -ne 0) { throw 'Backend installation failed.' }
+if (-not (Test-Path -LiteralPath '.env')) {
+    Copy-Item -LiteralPath '.env.example' -Destination '.env'
+}
+& .\backend\.venv\Scripts\python.exe -m alembic -c backend/alembic.ini upgrade head
+if ($LASTEXITCODE -ne 0) { throw 'Database migration failed.' }
+& .\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --reload --no-access-log
+```
+
+**Terminal 2: React.** Install dependencies on first setup, then start Vite:
+
+```powershell
+Set-Location frontend
+npm.cmd ci
+if ($LASTEXITCODE -ne 0) { throw 'Frontend installation failed.' }
+npm.cmd ci --prefix tools/lint
+if ($LASTEXITCODE -ne 0) { throw 'Lint tooling installation failed.' }
+if (-not (Test-Path -LiteralPath '.env.local')) {
+    Copy-Item -LiteralPath '.env.example' -Destination '.env.local'
+}
+npm.cmd run dev
+```
+
+Open **http://127.0.0.1:5173/projects**. The default API URL is `http://127.0.0.1:8000/api/v1`; frontend `.env.local` can override `VITE_API_BASE_URL`. Backend CORS already permits `http://127.0.0.1:5173` and `http://localhost:5173`. No backend change is required. Leave both server terminals running; use another terminal for test commands. Press **Ctrl+C** in a server terminal to regain its command prompt. On later launches, installation can be omitted; keep migrations current before starting FastAPI.
+
+The normal database is the configurable, ignored `data/local/tracesync.db`. Alembic creates a fresh schema; the API never creates tables or seeds projects at startup. No existing database, virtual environment, confidential workbook or machine-specific folder is required after cloning and installing dependencies.
 
 ### Existing development-laptop runtime
 
@@ -89,7 +127,7 @@ Vite supports direct-link SPA history fallback. Deploying `dist/` later will req
 
 ## Real-browser verification
 
-Playwright tests rendered desktop/mobile navigation, visible and hidden routes, direct reloads, modal focus containment, Escape/backdrop/close-button behavior, focus restoration, skip navigation, desktop resizing and mobile overflow. It also covers guide Next/Back, numbered steps, skip/reopen/restart, progress labeling, reduced motion, and absence of backend requests. Choose one browser setup from `frontend/`:
+Playwright tests render desktop/mobile navigation, visible and hidden routes, direct reloads, modal focus containment, Escape/backdrop/close-button behavior, focus restoration, skip navigation, desktop resizing and mobile overflow. They also cover the educational guide, controlled project/cycle creation and selection, retries, duplicate-submit prevention and keyboard forms at 320px. Controlled tests intercept only fictional test responses; they do not verify FastAPI integration. The guide alone still makes no API requests. Choose one browser setup from `frontend/`:
 
 ```powershell
 # Portable: download Playwright's matching Chromium once.
@@ -107,13 +145,36 @@ Remove-Item Env:TRACESYNC_BROWSER_CHANNEL
 
 Playwright starts Vite if needed or reuses the server on port 5173. It stops a server it started itself, leaving any reused preview running. Screenshots/failure traces go in ignored `frontend/test-results/`. Browser installation initially needs internet; the installed browser can test the shell offline.
 
+### Optional real FastAPI browser test
+
+`projects-live.spec.ts` is skipped by default. It makes real browser HTTP requests without interception and **creates fictional records**, so use an isolated database. Stop any regular API process using port 8000, then run the following in a terminal at the repository root. Use a new unused database filename when a fresh database is desired; no existing file is deleted:
+
+```powershell
+$env:TRACESYNC_DATABASE_URL = 'sqlite+pysqlite:///data/local/projects-browser-test.db'
+& .\backend\.venv\Scripts\python.exe -m alembic -c backend/alembic.ini upgrade head
+if ($LASTEXITCODE -ne 0) { throw 'Test database migration failed.' }
+& .\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+Keep the frontend configured for that same API URL. In a separate terminal at `frontend/` with Node 24 selected:
+
+```powershell
+$env:TRACESYNC_BROWSER_CHANNEL = 'msedge'
+$env:TRACESYNC_LIVE_API_URL = 'http://127.0.0.1:8000/api/v1'
+npm.cmd run test:browser -- --workers=3
+Remove-Item Env:TRACESYNC_LIVE_API_URL
+Remove-Item Env:TRACESYNC_BROWSER_CHANNEL
+```
+
+The opt-in URL tells the test which real API responses to verify; it does not reconfigure Vite. The frontend's `VITE_API_BASE_URL` must match it. This checks HTTP 201 responses, CORS, request IDs, project/cycle relationships, real database retrieval after reload and desktop/mobile rendering. After stopping the test backend with Ctrl+C, remove `TRACESYNC_DATABASE_URL` from that terminal before launching the normal backend again. The test database and browser artifacts remain ignored by Git. The test deliberately leaves its fictional records for inspection; there are no deletion endpoints.
+
 ## Routes, design and accessibility
 
 | Route | Screen |
 |---|---|
 | `/` | Redirect to `/overview` |
 | `/overview` | Compact welcome, interactive guide, no-project empty state and review workflow |
-| `/projects` | Projects placeholder |
+| `/projects` | Functional project directory, creation forms, cycle listing/creation and workspace selection |
 | `/upload-reports` | Upload Reports placeholder |
 | `/evidence` | Evidence Explorer placeholder |
 | `/reconciliation` | Hidden future route; direct-link placeholder |
@@ -165,13 +226,35 @@ Small text on ice blue uses the darker `primary-hover` token: its contrast is ap
 
 The reusable `GettingStartedGuide` explains four steps: **Create a project**, **Create an upload cycle**, **Upload source reports**, and **Explore evidence**. Next and Back move through explanations; numbered buttons allow direct selection. Skip collapses the guide, Reopen starts it from the first step, and Finish guide offers Restart. An accessible progress bar, live step announcements and focus restoration support keyboard use. Reduced-motion preferences apply to the progress transition.
 
-Progress is explicitly labeled **Guide progress**. Reading a step never completes project work, creates a record or uploads a report. The no-project state remains unchanged after finishing. All guide state stays in React memory; no localStorage, sessionStorage, backend or authentication is used. Reloading or leaving/revisiting Overview resets the guide. The View projects link opens the existing placeholder, whose project tools remain unimplemented.
+Progress is explicitly labeled **Guide progress**. Reading a step never completes project work, creates a record or uploads a report. Workspace selection remains unchanged after finishing. All guide state stays in React memory; no localStorage, sessionStorage, backend or authentication is used. Reloading or leaving/revisiting Overview resets the guide. The View projects / Manage workspace link opens the functional Projects screen; the four-step educational content is unchanged.
+
+## Projects and workspace selection
+
+- Open Projects from the sidebar, Overview or header workspace link. Project lists show real names, descriptions when present and UTC creation dates. Refresh retrieves every page using the API's supported `limit`/`offset` contract.
+- Choose **New project**, enter a required name (1–200 characters after trimming) and optional description (up to 4,000 characters), then create it. A successful response selects the new project. Select any existing project to view its upload cycles.
+- Choose **New cycle** inside the selected project's panel. Only its required name is submitted. A successful response selects the cycle. **Use this cycle** selects an existing cycle. Ingestion status is displayed as supplied by the API; it is not review status or a completion percentage.
+- A lightweight React Context shares fetched metadata and selected IDs across routes. Switching projects clears the cycle immediately. Only fetched project/cycle records or successful creation responses can be selected. Refresh clears selections absent from server results; a cycle-endpoint 404 invalidates its project. Delayed responses cannot select another project's cycle.
+- Selection stays in React memory while navigating and resets on reload. Projects/cycles themselves persist in SQLite and are fetched again on Projects. The Overview remains a compact welcome with workspace context, not a functional analytics dashboard. Reading the guide does not select or create anything.
+- Lists have loading, empty, error and retry states. Failed refreshes retain cached list rows with selection disabled until a successful retry. Forms retain input after an API failure, announce feedback and expose safe request IDs. Saving disables controls and guards repeated submits; POST requests are never automatically retried.
+
+Forms are inline, labeled and keyboard accessible. Focus moves to the name field on opening and returns to the creation button on closing. Selection uses `aria-pressed` plus visible text, feedback uses live/status or alert regions, long names wrap in content, and the header truncates names while preserving its full accessible label/title. All new styles use the existing palette tokens and reduced-motion rules.
+
+**Limits:** the backend allows repeated project/cycle names and has no create idempotency key. The submit guard prevents simultaneous accidental requests, not separate intentional creations. After a network interruption, refresh before trying again: a server may have saved the first request without its response reaching the browser. Lists currently load all pages into memory; server-side search/paging UI is deferred. There is no editing, deletion, cross-tab selection persistence or upload UI in this milestone.
 
 ## API configuration
 
 `src/services/apiClient.ts` centralizes `VITE_API_BASE_URL`, defaulting to `http://127.0.0.1:8000/api/v1`. Vite reads frontend `.env.local`, independently of the backend's root `.env`. Restart Vite after environment changes.
 
-The generic `request<T>` accepts API-relative paths, preserves caller headers and cancellation, expects JSON, and supports empty HTTP 204 responses. `ApiError` carries a safe message, HTTP status, code and request ID. It recognizes the backend's `{ error: { code, message }, request_id }` envelope, safely handles non-JSON/network failures and does not force multipart content types. There are no endpoint-specific calls, automatic requests, retries or persisted browser data.
+The generic `request<T>` accepts API-relative paths, preserves caller headers and cancellation, expects JSON, and supports empty HTTP 204 responses. `ApiError` carries a safe message, HTTP status, code and request ID. It recognizes the backend's `{ error: { code, message }, request_id }` envelope, safely handles non-JSON/network failures and does not force multipart content types. Its behavior is unchanged. `workspaceApi.ts` adds only the four existing endpoints below; Projects fetches on entry/selection and explicit refresh. No automatic retry or browser-storage persistence is added.
+
+| Method | Existing endpoint | Request / response |
+|---|---|---|
+| GET | `/api/v1/projects?limit=200&offset=…` | Page of `id`, `name`, `description`, `created_at`, `updated_at` |
+| POST | `/api/v1/projects` | `{ name, description }` → saved project, HTTP 201 |
+| GET | `/api/v1/projects/{project_id}/cycles?limit=200&offset=…` | Page of `id`, `project_id`, `name`, `created_at`, `ingestion_status` |
+| POST | `/api/v1/projects/{project_id}/cycles` | `{ name }` → saved cycle, HTTP 201 |
+
+Page envelopes contain `items`, `total`, `limit` and `offset`. The service follows all pages before publishing a list; canceled or older requests do not overwrite a newer selection. No customer fields, cycle progress or extra endpoints are inferred from the broader project specification.
 
 All `VITE_*` values are public browser configuration. Never put tokens, passwords, workbook contents or secrets in them. `.env.example` is safe to track; local env files, dependencies, build output and browser artifacts remain ignored. Existing backend CORS settings support this frontend without backend changes.
 
@@ -187,13 +270,15 @@ frontend/
     main.tsx / App.tsx
     layouts/       # shared shell
     components/    # brand, sidebar, navigation, onboarding/GettingStartedGuide + guideSteps
-    pages/         # Overview, placeholder, not-found
-    services/      # unused generic API client
-    types/         # backend error-envelope contract
+    contexts/      # in-memory workspace, fetched metadata and request lifecycle
+    pages/         # Overview, Projects, placeholder, not-found
+    services/      # existing generic API client + typed workspace endpoints
+    types/         # backend error-envelope and project/cycle/page contracts
     styles/        # tokens and Tailwind rules
   tests/
     setup.ts / App.test.tsx / GettingStartedGuide.test.tsx / apiClient.test.ts
-    browser/shell.spec.ts
+    ProjectsPage.test.tsx / workspaceApi.test.ts / fixtures/workspace.ts
+    browser/{shell,projects,projects-live}.spec.ts
   eslint.config.mjs
   tools/lint/      # isolated lint-only manifest, lockfile and flat configuration
 ```
@@ -212,7 +297,7 @@ frontend/
 
 Upstream setup references: [Vite](https://vite.dev/guide/), [Tailwind Vite integration](https://tailwindcss.com/docs/installation/using-vite), [React Router](https://reactrouter.com/start/declarative/installation).
 
-Prompt 0.4B will implement the functional Overview only after visual approval. Later screens remain separate milestones.
+Only Projects and Cycles are functional in Prompt 0.5. The full Overview dashboard and other screens require separate authorization after visual/functional review.
 
 ## Prompt 0.4A verification
 
@@ -233,3 +318,58 @@ Verified on 2026-10-24: **27 unit/component tests passed**, **6 real-browser che
 A targeted real-browser color audit sampled **507 rendered text/background pairs** (minimum **4.772:1**) and **21 keyboard-focus states** (minimum outline/background contrast **6.245:1**), plus **20 token pairs** covering semantic colors, controls and accents. It included hover states, Overview, placeholders and the unknown-route state, with no browser errors. Disabled controls were excluded from the text measurements. These are targeted checks, not a full accessibility conformance audit. Screenshots and measurement artifacts stay in ignored local output.
 
 The palette refinement changes only `src/styles/tokens.css`, `src/styles/app.css`, `index.html` and this README. No package, component logic, API, backend, migration, database or confidential workbook changes were needed. The backend tests were not rerun for this presentation-only refinement; the preceding milestone's results are recorded above. The preview remains at **http://127.0.0.1:5173/overview**. No further screen implementation, commit or push was performed.
+
+## Prompt 0.5 verification
+
+Verified on **2026-10-25**:
+
+| Check | Result |
+|---|---|
+| Unit/component/API-client tests | **47 passed**, five files |
+| ESLint | Passed, zero warnings |
+| TypeScript | Passed (`tsc --noEmit`, also part of build) |
+| Production build | Passed |
+| Microsoft Edge browser tests | **10 passed**, including the opt-in real FastAPI test |
+| Backend regression suite | **67 passed, 1 intentional confidential-data skip** |
+| Protected-file integrity | **64 hashes unchanged**, covering backend files, original workbooks and existing development database |
+| Git exclusions | Test database, browser output, dependencies and local database remain ignored |
+
+Component tests cover loading/empty lists, creation success/failure, required-name validation, repeated-submit prevention, selection across routes, cycle clearing on project changes, retries, list refresh, removed selections, focus restoration, concurrent refresh/creation and late responses. Collection tests verify pagination and cancellation. Browser tests cover the full controlled workflow, server failures/retry, duplicate-submit prevention, 320px keyboard forms with long labels, navigation, onboarding and reduced motion.
+
+The live integration test used **real HTTP requests to unchanged FastAPI on port 8000**, backed by a fresh database created with Alembic revisions `0001_create_projects` and `0002_add_ingestion`. The browser created a fictional project and cycle, verified HTTP 201, CORS and request IDs, selected the workspace, reloaded and retrieved the saved cycle again. These were not mocked responses. The isolated database is `data/outputs/frontend-tooling/projects-0.5/acceptance.db`; it is separate from the unchanged existing `data/local/tracesync.db`. Desktop and 320px screens were visually inspected, including a long-label stress case. The preview is **http://127.0.0.1:5173/projects** and uses the isolated synthetic database.
+
+The backend still emits its existing upstream Starlette/HTTPX TestClient deprecation warning. Browser tooling emits a harmless inherited color-environment warning. Neither caused a test failure. No backend compatibility defect or new dependency was found. An actual second Windows laptop has not been exercised in this milestone; relative configuration and the existing locked dependencies are preserved. Setup still requires Git, Python 3.12, Node 24, package installation and explicit Alembic migrations. No confidential workbooks or internet services are needed for the project/cycle workflow after installation.
+
+### Files in Prompt 0.5
+
+Created:
+
+```text
+frontend/src/types/workspace.ts
+frontend/src/services/workspaceApi.ts
+frontend/src/contexts/WorkspaceContext.tsx
+frontend/src/components/projects/CreationForm.tsx
+frontend/src/components/projects/RequestFeedback.tsx
+frontend/src/pages/ProjectsPage.tsx
+frontend/tests/fixtures/workspace.ts
+frontend/tests/ProjectsPage.test.tsx
+frontend/tests/workspaceApi.test.ts
+frontend/tests/browser/projects.spec.ts
+frontend/tests/browser/projects-live.spec.ts
+```
+
+Modified:
+
+```text
+frontend/src/App.tsx
+frontend/src/layouts/AppLayout.tsx
+frontend/src/pages/OverviewPage.tsx
+frontend/src/styles/app.css
+frontend/tests/App.test.tsx
+frontend/tests/browser/shell.spec.ts
+frontend/README.md
+README.md
+docs/IMPLEMENTATION_PLAN.md
+```
+
+No backend, migration, workbook, API-client foundation, palette-token, dependency or lockfile changes were made. No commit or push was performed. Prompt 0.5 stops here for visual and functional review.

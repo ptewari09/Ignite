@@ -4,18 +4,21 @@ import { AppLayout } from './layouts/AppLayout';
 import { OverviewPage } from './pages/OverviewPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { ProjectsPage } from './pages/ProjectsPage';
+import { WorkspaceProvider } from './contexts/WorkspaceContext';
 
 export function App() {
   return (
-    <Routes>
+    <WorkspaceProvider><Routes>
       <Route element={<AppLayout />}>
         <Route index element={<Navigate to="/overview" replace />} />
         <Route path="overview" element={<OverviewPage />} />
-        {applicationRoutes.filter((item) => item.path !== '/overview').map((item) => (
+        <Route path="projects" element={<ProjectsPage />} />
+        {applicationRoutes.filter((item) => !['/overview', '/projects'].includes(item.path)).map((item) => (
           <Route key={item.path} path={item.path.slice(1)} element={<PlaceholderPage title={item.label} />} />
         ))}
         <Route path="*" element={<NotFoundPage />} />
       </Route>
-    </Routes>
+    </Routes></WorkspaceProvider>
   );
 }
