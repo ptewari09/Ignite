@@ -2,7 +2,7 @@
 
 TraceSync helps transformation leads compare an initial transformation report with a post-upload report, inspect the supporting messages, and prepare a reviewed customer Excel report. Today this involves manually mapping objects and errors between spreadsheets. The intended application preserves that evidence while reducing repetitive copying and comparison.
 
-**Current stage: Prompt 0.3 — Excel ingestion and evidence persistence, completed on 2026-10-24.** The backend manages projects/cycles, ingests the two verified source roles transactionally and returns paginated raw evidence with normalized keys and source-row provenance. Health/readiness and the discovery utility remain available. Reconciliation, UI, customer export and AI are not implemented.
+**Current stage: Prompt 0.4A.1 — Overview refinement and interactive onboarding.** Backend Prompt 0.3A acceptance testing passed. The backend manages projects/cycles, ingests both source roles transactionally and returns paginated evidence with provenance. The independently runnable frontend provides a responsive shell, compact Overview, educational guide and future-screen placeholders. Backend-connected frontend screens, reconciliation, customer export and AI remain future work.
 
 ## Intended workflow
 
@@ -24,7 +24,7 @@ The existing customer workbook is a format/evaluation reference. Ordinary proces
 | Verification | pytest/httpx; Vitest/React Testing Library | Check processing, API and important UI behavior |
 | Later options | Docker Compose; PostgreSQL; approved AI provider | Reproducible demo, shared deployment, optional explanations |
 
-Python, FastAPI/Uvicorn, Pydantic/Pydantic Settings, SQLAlchemy/Alembic, SQLite, OpenPyXL/pandas, multipart/XML-safety dependencies and Pytest/HTTPX are declared and installed in the backend's isolated environment. Frontend and later deployment/AI choices remain proposed. No customer workbook was uploaded externally. Ingestion works locally without internet once dependencies are installed.
+Backend dependencies remain in their isolated environment. The frontend now declares React, TypeScript, Vite, Tailwind CSS, React Router, Lucide and focused test tools, with an npm lockfile. No customer workbook was uploaded externally. The installed ingestion backend and frontend shell work locally without internet; later deployment/AI choices remain proposed.
 
 ## Repository layout
 
@@ -47,8 +47,9 @@ backend/
     unit/
     integration/
 frontend/
-  src/{api,components,pages,types}/  # reserved folders; no UI yet
-  tests/
+  package.json / package-lock.json
+  src/{layouts,components,pages,services,types,styles}/
+  tests/         # component/API-client and real-browser navigation checks
 docs/
   Project_Reference.md
   DATA_DICTIONARY.md
@@ -93,8 +94,9 @@ The utility assumes the inspected tabular sheets use row 1 for headers. It repor
 - [Questions for seniors](docs/SENIOR_QUESTIONS.md): current priorities and a question list for each build stage.
 - [Original project reference](docs/Project_Reference.md): broader proposed specification; unchanged.
 - [Backend setup](backend/README.md): fresh-clone Windows prerequisites, installation/migrations, synthetic ingestion walkthrough, endpoint contract and verified Prompt 0.3 results.
+- [Frontend setup](frontend/README.md): Node 24 prerequisites, exact Windows installation/start/test/build commands and Prompt 0.4A routes.
 
-Default tests use generated fictional workbooks and fresh temporary databases, so another Windows clone does not need company data or an existing database. See the backend README's Demo Portability Check. Next is a separately authorized reconciliation task; message-block linkage, scope evidence and unresolved report rules remain review questions. Prompt 0.3 stops before matching.
+Default backend tests use fictional workbooks and fresh temporary databases. Frontend shell/onboarding tests need no company data, database or backend. Development proceeds one screen at a time: Prompt 0.4A.1 refines the landing page before a separately authorized functional Overview in Prompt 0.4B. Message-block linkage, scope evidence and unresolved report rules remain review questions for later reconciliation work.
 
 ## Local data and Git
 

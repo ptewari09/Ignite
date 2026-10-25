@@ -1,5 +1,16 @@
 # TraceSync implementation plan
 
+## Updated frontend sequence — Prompt 0.4A
+
+**Current refinement: Prompt 0.4A.1.** Replace the static Overview introduction with a compact welcome, reusable interactive educational guide, useful empty state and concise workflow explanation. Guide progress is local reader state, never actual project progress. Hide Reconciliation and Smart Blocker Radar from navigation while preserving their routes/plans; remove the sidebar signoff. Preserve the existing stack and backend. Verify component/browser behavior, TypeScript, ESLint and production build before stopping for visual review. Prompt 0.4B remains separately authorized work.
+
+The user has authorized incremental frontend development after successful backend Prompt 0.3A acceptance testing. This sequence supersedes the older recommendation below to implement reconciliation next.
+
+- Prompt 0.4A provides only the React/TypeScript/Vite/Tailwind foundation, shared responsive navigation, minimal Overview, consistent future-screen placeholders and an unused typed API client. The backend remains unchanged.
+- Verify component behavior, real desktop/mobile rendering, keyboard navigation, TypeScript, production build and the backend suite. See [frontend/README.md](../frontend/README.md) for Windows commands.
+- Leave a local development preview available for visual review. Do not automatically commit or push.
+- Prompt 0.4B is the functional Overview and requires visual approval first. Each later screen is a separate milestone. No reconciliation, upload UI, evidence tables, reports, AI or authentication is authorized by Prompt 0.4A.
+
 Plan based on [Project_Reference.md](Project_Reference.md) and the inspected schemas. Updated on 2026-10-24 for a solo developer. Prompt 0.1 discovery, Prompt 0.2 foundation and Prompt 0.3 ingestion are complete. Reconciliation and later business workflows remain future work.
 
 ## Current boundary — Prompt 0.3 ingestion complete

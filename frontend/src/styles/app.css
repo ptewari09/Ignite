@@ -1,0 +1,138 @@
+@import "tailwindcss" source(none);
+@import "./tokens.css";
+@source "../";
+
+@layer base {
+  html { color-scheme: light; }
+  body { @apply m-0 bg-canvas font-sans text-ink antialiased; }
+  button, a { -webkit-tap-highlight-color: transparent; }
+  button { @apply cursor-pointer; }
+  :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+  ::selection { background: var(--color-primary-line); color: var(--color-ink); }
+}
+
+@layer components {
+  .app-shell { @apply min-h-dvh; }
+  .desktop-sidebar { @apply fixed inset-y-0 left-0 z-30 hidden w-64 bg-sidebar lg:block; }
+  .sidebar-content { @apply flex h-full min-h-dvh flex-col bg-sidebar text-sidebar-text; }
+  .brand-container { @apply px-6 pb-9 pt-8; }
+  .brand { @apply flex items-center gap-3 rounded-lg; }
+  .brand:focus-visible, .nav-link:focus-visible, .mobile-close:focus-visible { outline-color: var(--color-brand-accent); }
+  .brand-mark { @apply flex size-11 shrink-0 items-center justify-center rounded-xl border border-sidebar-line bg-sidebar-hover text-brand-accent; }
+  .brand-name { @apply block text-[24px] font-semibold leading-none tracking-[-0.9px] text-surface; }
+  .brand-caption { @apply mt-2 block text-[8px] font-medium tracking-[1.1px] text-sidebar-muted; }
+  .sidebar-nav { @apply flex-1 px-4; }
+  .nav-group { @apply mb-8; }
+  .nav-group-label { @apply mb-3 pl-3 text-[10px] font-semibold uppercase tracking-[1.7px] text-sidebar-muted; }
+  .nav-link { @apply relative flex min-h-11 items-center gap-3 rounded-lg border border-transparent px-3 py-3 text-[13px] font-medium leading-5 text-sidebar-text transition-colors hover:bg-sidebar-hover hover:text-surface; }
+  .nav-link-active { @apply border-sidebar-line bg-sidebar-active text-sidebar-heading; }
+  .nav-link-active > svg { @apply text-brand-accent; }
+  .nav-active-mark { @apply ml-auto hidden size-1.5 shrink-0 rounded-full bg-brand-accent; }
+  .nav-link-active .nav-active-mark { @apply block; }
+  .sidebar-footer { @apply px-5 pb-6 pt-8; }
+  .sidebar-note { @apply flex items-start gap-3 rounded-xl border border-sidebar-line bg-sidebar-hover p-4; }
+  .sidebar-note > svg { @apply mt-0.5 shrink-0; }
+  .sidebar-note-title { @apply block text-[12px] font-medium text-sidebar-heading; }
+  .sidebar-note-copy { @apply mt-1.5 block text-[11px] leading-relaxed text-sidebar-text; }
+  .app-workspace { @apply flex min-h-dvh min-w-0 flex-col lg:ml-64; }
+  .app-header { @apply flex min-h-20 items-center justify-between gap-3 border-b border-line bg-surface px-5 sm:px-8 xl:px-11; }
+  .header-breadcrumb { @apply flex min-w-0 items-center gap-2.5 text-sm; }
+  .breadcrumb-root { @apply hidden text-muted sm:inline; }
+  .header-breadcrumb > svg { @apply hidden text-subtle sm:block; }
+  .header-title { @apply font-semibold text-ink; }
+  .project-context { @apply flex shrink-0 items-center gap-2 rounded-md border border-primary-line bg-primary-soft px-2.5 py-2 text-[11px] font-medium text-muted sm:px-3 sm:text-xs; }
+  .project-context-full { @apply hidden min-[480px]:inline; }
+  .project-context-short { @apply min-[480px]:hidden; }
+  .icon-button { @apply inline-flex size-10 shrink-0 items-center justify-center rounded-lg border border-control-line bg-surface text-ink transition-colors hover:border-primary hover:bg-primary-soft; }
+  .menu-toggle { @apply lg:hidden; }
+  .main-content { @apply mx-auto w-full max-w-[1360px] flex-1 px-5 pb-8 pt-9 outline-none sm:px-8 sm:pt-11 xl:px-11; }
+  .main-content:focus-visible { outline: none; }
+  .page-content { @apply w-full; }
+  .page-introduction { @apply mb-9; }
+  .page-eyebrow { @apply mb-5 flex items-center gap-2.5 text-[10px] font-semibold tracking-[1.7px] text-muted; }
+  .eyebrow-line { @apply h-px w-6 bg-primary; }
+  .page-introduction h1 { @apply text-[32px] font-semibold leading-[1.2] tracking-[-1.1px] sm:text-[38px]; }
+  .page-description { @apply mt-5 max-w-[620px] text-[14px] leading-[1.85] text-muted sm:text-[15px]; }
+  .empty-state { @apply mt-6 flex min-h-[292px] flex-col items-center justify-center rounded-xl border border-dashed border-line-strong bg-surface px-5 py-10 text-center; }
+  .empty-icon { @apply flex size-14 items-center justify-center rounded-2xl bg-primary-soft text-primary; }
+  .empty-state h2 { @apply text-[17px] font-semibold tracking-[-0.3px]; }
+  .empty-state p { @apply mt-2.5 max-w-md text-[12px] leading-[1.8] text-muted sm:text-[13px]; }
+  .availability-note { @apply mt-5 inline-flex items-center gap-2 rounded-full border border-line bg-canvas px-3 py-1.5 text-[10px] font-medium text-muted; }
+  .availability-note > span { @apply size-1.5 rounded-full bg-subtle; }
+  .overview-introduction { @apply mb-6; }
+  .overview-introduction h1 { @apply text-[25px] font-semibold leading-tight tracking-[-0.65px] sm:text-[28px]; }
+  .overview-introduction p { @apply mt-2.5 max-w-[700px] text-[14px] leading-relaxed text-muted; }
+  .primary-button, .secondary-button { @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-[12px] font-semibold transition-colors; }
+  .primary-button { @apply border border-primary bg-primary text-surface hover:border-primary-hover hover:bg-primary-hover; }
+  .secondary-button { @apply border border-control-line bg-surface text-ink hover:border-primary hover:bg-primary-soft; }
+  .secondary-button:disabled { @apply cursor-default border-line bg-surface text-subtle opacity-50; }
+  .onboarding-card { @apply overflow-hidden rounded-xl border border-primary-line bg-surface shadow-panel; }
+  .guide-header { @apply flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4 sm:px-6; }
+  .guide-heading-group { @apply flex min-w-0 items-center gap-3; }
+  .guide-heading-icon { @apply flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent; }
+  .guide-heading-group h2 { @apply text-[16px] font-semibold tracking-[-0.2px]; }
+  .guide-heading-group p { @apply mt-1 max-w-[400px] text-[12px] leading-relaxed text-muted; }
+  .guide-skip { @apply min-h-10 shrink-0 rounded-lg px-2.5 text-[12px] font-medium text-muted transition-colors hover:bg-canvas hover:text-ink; }
+  .guide-body { @apply grid min-w-0 sm:grid-cols-[210px_minmax(0,1fr)] xl:grid-cols-[235px_minmax(0,1fr)]; }
+  .guide-outline { @apply grid grid-cols-4 gap-2 border-b border-line bg-canvas p-3 sm:flex sm:flex-col sm:gap-1 sm:border-b-0 sm:border-r sm:p-4; }
+  .guide-step-button { @apply flex min-h-11 w-full items-center justify-center gap-2.5 rounded-lg border border-transparent p-2 text-left text-muted transition-colors hover:bg-surface hover:text-ink sm:min-h-12 sm:justify-start sm:px-3; }
+  .guide-step-number { @apply flex size-7 shrink-0 items-center justify-center rounded-full border border-control-line bg-surface text-[11px] font-semibold; }
+  .guide-step-label { @apply hidden text-[12px] font-medium leading-relaxed sm:inline; }
+  .guide-step-active { @apply border-primary bg-primary-line text-primary-hover hover:bg-primary-line hover:text-primary-hover; }
+  .guide-step-active .guide-step-number { @apply border-primary bg-primary text-surface; }
+  .guide-detail { @apply min-w-0 px-5 py-5 sm:min-h-[248px] sm:px-6 sm:py-6 xl:px-7; }
+  .guide-step-caption { @apply mb-2.5 text-[11px] font-medium text-accent; }
+  .guide-detail h3 { @apply flex items-start gap-2.5 rounded-sm text-[20px] font-semibold leading-snug tracking-[-0.35px]; }
+  .guide-detail h3 > svg { @apply mt-0.5 shrink-0 text-primary; }
+  .guide-description { @apply mt-3 max-w-[680px] text-[13px] leading-[1.8] text-muted; }
+  .guide-note { @apply mt-5 flex items-start gap-2.5 rounded-lg border border-line bg-canvas px-3.5 py-3; }
+  .guide-note > svg { @apply mt-0.5 shrink-0 text-muted; }
+  .guide-note h4 { @apply text-[11px] font-semibold text-ink; }
+  .guide-note p { @apply mt-1 text-[12px] leading-[1.7] text-muted; }
+  .guide-footer { @apply flex flex-col justify-between gap-4 border-t border-line px-5 py-4 sm:flex-row sm:items-center sm:px-6; }
+  .guide-progress-area { @apply w-full sm:w-40; }
+  .guide-progress-label { @apply mb-2 flex justify-between gap-4 text-[10px] font-medium text-muted; }
+  .guide-progress-track { @apply h-1 overflow-hidden rounded-full bg-line; }
+  .guide-progress-track > span { @apply block h-full rounded-full bg-accent transition-[width] duration-200; }
+  .guide-controls { @apply flex items-center gap-2.5; }
+  .guide-controls > button { @apply flex-1 sm:flex-none; }
+  .guide-controls > .primary-button { @apply min-w-24; }
+  .guide-disclaimer { @apply border-t border-line bg-canvas px-5 py-3 text-[10px] leading-relaxed text-muted sm:px-6; }
+  .onboarding-collapsed .guide-header { @apply border-b-0; }
+  .guide-reopen { @apply shrink-0; }
+  .project-empty-card { @apply mt-5 grid grid-cols-[44px_minmax(0,1fr)] items-start gap-4 rounded-xl border border-line bg-surface p-5 shadow-panel sm:grid-cols-[44px_minmax(0,1fr)_auto] sm:items-center sm:px-6; }
+  .project-empty-icon { @apply flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary-line bg-primary-soft text-primary; }
+  .project-empty-copy { @apply min-w-0; }
+  .project-empty-copy h2 { @apply text-[14px] font-semibold; }
+  .project-empty-copy p { @apply mt-1.5 text-[12px] leading-relaxed text-muted; }
+  .project-empty-copy > span { @apply mt-1.5 block text-[11px] leading-relaxed text-muted; }
+  .project-preview-link { @apply col-start-2 justify-self-start sm:col-start-auto; }
+  .review-workflow { @apply mt-5 rounded-xl border border-line bg-surface px-5 py-5 shadow-panel sm:px-6; }
+  .review-workflow-header { @apply flex flex-wrap items-center justify-between gap-2.5; }
+  .review-workflow-header h2 { @apply text-[12px] font-semibold; }
+  .review-workflow-header > span { @apply flex items-center gap-1.5 text-[10px] text-muted; }
+  .review-workflow-header > span > svg { @apply text-success; }
+  .review-workflow-steps { @apply mt-4 grid grid-cols-2 gap-x-4 gap-y-4 xl:grid-cols-4 xl:gap-3; }
+  .review-workflow-steps > li { @apply flex min-w-0 items-center justify-between gap-2; }
+  .review-workflow-steps > li > span { @apply flex items-center gap-2 text-[11px] font-medium leading-relaxed text-muted; }
+  .review-workflow-steps > li > span > svg { @apply shrink-0 text-ink; }
+  .review-workflow-steps > li > svg { @apply hidden shrink-0 text-line-strong xl:block; }
+  .workspace-footer { @apply mx-auto flex w-full max-w-[1360px] items-center justify-between gap-5 px-5 pb-6 pt-1 text-[10px] leading-relaxed text-subtle sm:px-8 xl:px-11; }
+  .workspace-footer > span:last-child { @apply hidden sm:block; }
+  .compact-introduction h1 { @apply text-3xl; }
+  .placeholder-state { @apply min-h-[360px] border-solid; }
+  .placeholder-state > .empty-icon { @apply mb-1; }
+  .placeholder-state .availability-note { @apply mb-4; }
+  .placeholder-state h1 { @apply mt-4 text-2xl font-semibold; }
+  .primary-link { @apply mt-6 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-surface transition-colors hover:bg-primary-hover; }
+  .skip-link { @apply pointer-events-none fixed left-4 top-4 z-50 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-surface opacity-0 focus:pointer-events-auto focus:opacity-100; }
+  .mobile-navigation { @apply fixed inset-y-0 left-0 m-0 h-dvh max-h-dvh w-72 max-w-[85vw] overflow-visible border-0 bg-sidebar p-0 text-sidebar-text; }
+  .mobile-navigation::backdrop { background: var(--color-backdrop); }
+  .mobile-sidebar { @apply relative h-full overflow-y-auto; }
+  .mobile-sidebar .brand-container { @apply pb-9 pt-9; }
+  .mobile-sidebar .brand-caption { @apply text-[7px]; }
+  .mobile-close { @apply absolute right-3 top-3 z-10 size-7 border-transparent bg-sidebar-hover text-sidebar-text hover:bg-sidebar-active; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+}
