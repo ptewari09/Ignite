@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/safeBrowser';
 
 const routes = [
   ['Projects', '/projects'],
@@ -39,6 +39,8 @@ test('desktop shell renders, all links navigate, and direct routes survive reloa
     await expect(page).toHaveURL(new RegExp(path + '$'));
     await expect(page.getByRole('heading', { name, level: 1, exact: true })).toBeVisible();
     if (path === '/projects') await expect(page.getByRole('heading', { name: 'No projects yet' })).toBeVisible();
+    else if (path === '/upload-reports') await expect(page.getByRole('heading', { name: 'Choose a project and upload cycle' })).toBeVisible();
+    else if (path === '/evidence') await expect(page.getByRole('heading', { name: 'Choose a project and upload cycle' })).toBeVisible();
     else await expect(page.getByRole('heading', { name: 'This screen is not available yet' })).toBeVisible();
     await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
     await expect(navigation.getByRole('link', { name, exact: true })).toHaveAttribute('aria-current', 'page');

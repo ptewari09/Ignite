@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/safeBrowser';
 import type { Page } from '@playwright/test';
 import type { Project, UploadCycle } from '../../src/types/workspace';
 

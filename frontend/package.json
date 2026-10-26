@@ -10,7 +10,9 @@
     "lint": "node tools/lint/node_modules/eslint/bin/eslint.js . --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:browser": "playwright test",
+    "test:browser": "node tests/support/run-live-browser.mjs --controlled",
+    "test:browser:live": "node tests/support/run-live-browser.mjs",
+    "test:isolation": "node --test tests/support/isolation.test.mjs",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview"
   },

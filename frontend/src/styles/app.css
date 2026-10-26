@@ -192,6 +192,126 @@
   .field-hint { @apply mb-4 mt-1.5 text-[11px] leading-relaxed text-muted; }
   .field-error { @apply mb-4 text-[12px] leading-relaxed text-danger; }
   .creation-actions { @apply mt-4 flex flex-wrap gap-2; }
+  .upload-workspace-context { @apply grid grid-cols-[21px_minmax(0,1fr)] items-start gap-3 rounded-xl border border-primary-line bg-primary-soft p-5 sm:grid-cols-[21px_minmax(0,1fr)_auto]; }
+  .upload-workspace-context > svg { @apply mt-1 shrink-0 text-primary; }
+  .upload-workspace-context dl { @apply grid min-w-0 gap-3 sm:grid-cols-2; }
+  .upload-workspace-context dt { @apply text-[10px] font-semibold uppercase tracking-[1px] text-muted; }
+  .upload-workspace-context dd { @apply mt-1 text-[13px] font-semibold leading-relaxed; overflow-wrap: anywhere; }
+  .upload-workspace-context > a { @apply col-start-2 justify-self-start sm:col-start-auto; }
+  .upload-workspace-toolbar { @apply mb-4 mt-6 flex flex-wrap items-center justify-between gap-3; }
+  .upload-workspace-toolbar > p { @apply text-[12px] text-muted; }
+  .upload-cards { @apply mt-5 grid items-start gap-5 xl:grid-cols-2; }
+  .upload-card-heading { @apply flex items-start gap-3; }
+  .upload-card-heading > div { @apply min-w-0; }
+  .upload-card h2 { @apply mt-1 text-[19px] font-semibold leading-snug tracking-[-0.3px]; }
+  .upload-role-icon { @apply flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary-line bg-primary-soft text-primary; }
+  .upload-role-secondary { @apply border-line bg-accent-soft text-accent; }
+  .workbook-requirements { @apply my-4 rounded-lg border border-line bg-canvas px-3.5 py-3 text-[11px] leading-relaxed text-muted; }
+  .workbook-requirements summary { @apply cursor-pointer rounded-sm font-semibold text-ink; }
+  .workbook-requirements p { @apply mt-2; }
+  .workbook-requirements h3 { @apply mb-1 mt-4 font-semibold text-ink; }
+  .workbook-requirements ul { @apply mt-2 flex flex-wrap gap-1.5; }
+  .workbook-requirements li { @apply rounded border border-line bg-surface px-2 py-1 text-[10px]; }
+  .upload-saved-status { @apply my-4 text-[12px] font-medium text-muted; }
+  .upload-occupied-note { @apply my-4 text-[11px] leading-relaxed text-muted; }
+  .file-dropzone { @apply flex min-h-[184px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-control-line bg-canvas px-3 py-5 text-center transition-colors; }
+  .file-dropzone > svg { @apply text-primary; }
+  .file-dropzone > p { @apply text-[12px] font-semibold; }
+  .file-dropzone > span { @apply text-[11px] leading-relaxed text-muted; }
+  .file-dropzone > button { @apply mt-2; }
+  .file-dropzone-active { @apply border-primary bg-primary-line; }
+  .file-dropzone-disabled { @apply opacity-60; }
+  .selected-file { @apply my-3 flex items-start gap-2.5 rounded-lg border border-primary-line bg-primary-soft p-3; }
+  .selected-file > svg { @apply mt-1 shrink-0 text-primary; }
+  .selected-file > div { @apply min-w-0 flex-1; }
+  .selected-file strong { @apply block text-[12px] font-semibold leading-relaxed; overflow-wrap: anywhere; }
+  .selected-file span { @apply mt-1 block text-[11px] text-muted; }
+  .selected-file > button { @apply size-8; }
+  .upload-submit { @apply w-full; }
+  .upload-result { @apply mt-4 flex items-start gap-2 rounded-lg border border-success bg-success-soft p-3 text-[12px] leading-relaxed text-success; }
+  .upload-result > svg { @apply mt-0.5 shrink-0; }
+  .upload-duplicate { @apply border-primary-line bg-primary-soft text-primary-hover; }
+  .import-details { @apply mt-5 border-t border-line pt-4; }
+  .import-saved-label { @apply mb-4 flex items-center gap-2 text-[12px] font-semibold text-success; }
+  .import-metadata { @apply grid gap-3; }
+  .import-metadata dt { @apply text-[10px] text-muted; }
+  .import-metadata dd { @apply mt-1 text-[12px] leading-relaxed; overflow-wrap: anywhere; }
+  .import-counts { @apply my-4 grid gap-2; }
+  .import-counts > div { @apply rounded-lg border border-line bg-canvas px-3 py-2.5; }
+  .import-counts h4 { @apply text-[12px] font-semibold; overflow-wrap: anywhere; }
+  .import-counts p { @apply mt-1 text-[11px] leading-relaxed text-muted; }
+  .import-counts strong { @apply font-semibold text-ink; }
+  .import-warnings { @apply rounded-lg border border-warning bg-warning-soft p-3 text-[11px] leading-relaxed text-warning; }
+  .import-warnings summary { @apply cursor-pointer rounded-sm font-semibold; }
+  .import-warnings summary > svg { @apply mr-1 inline-block align-text-bottom; }
+  .import-warnings ul { @apply mt-3 grid gap-3; }
+  .import-warnings span { @apply mt-1 block text-[10px]; }
+  .upload-empty { @apply my-5 rounded-xl border border-line bg-surface p-5 shadow-panel; }
+  .upload-empty h2 { @apply text-[17px] font-semibold; }
+  .upload-empty p { @apply mb-4 mt-2 max-w-xl text-[12px] leading-relaxed text-muted; }
+  .upload-data-note { @apply mt-6 flex items-start gap-2.5 rounded-lg border border-line bg-surface p-4 text-[11px] leading-relaxed text-muted; }
+  .upload-data-note > svg { @apply mt-0.5 shrink-0 text-success; }
+  .upload-navigation-note { @apply mt-3 text-[11px] leading-relaxed text-muted; }
+  .evidence-workspace { @apply mt-6 min-w-0 overflow-hidden rounded-xl border border-line bg-surface shadow-panel; }
+  .evidence-workspace-toolbar { @apply flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6; }
+  .evidence-readonly { @apply rounded-md border border-line bg-accent-soft px-2.5 py-1.5 text-[11px] font-medium text-accent; }
+  .evidence-tabs { @apply flex gap-1 overflow-x-auto border-y border-line bg-canvas px-3 pt-1 sm:px-5; }
+  .evidence-tab { @apply min-h-12 shrink-0 rounded-t-lg border-b-2 border-transparent px-3 py-3 text-[12px] font-medium text-muted transition-colors hover:bg-surface hover:text-ink; }
+  .evidence-tab-active { @apply border-primary bg-surface text-primary-hover; }
+  .evidence-tabs > button:focus-visible { outline-offset: -4px; }
+  .evidence-tabpanel { @apply min-w-0 p-5 sm:p-6; }
+  .evidence-dataset-heading { @apply flex flex-wrap items-start justify-between gap-3; }
+  .evidence-dataset-heading > div { @apply min-w-0 flex-1 basis-64; }
+  .evidence-dataset-heading h2 { @apply rounded-sm text-[18px] font-semibold; }
+  .evidence-dataset-heading p { @apply mt-2 text-[12px] leading-relaxed text-muted; }
+  .evidence-source-note { @apply mt-3 text-[11px] leading-relaxed text-muted; overflow-wrap: anywhere; }
+  .evidence-source-note strong { @apply font-medium text-ink; }
+  .evidence-filter { @apply mb-5 mt-5; }
+  .evidence-filter > label { @apply mb-2 block text-[12px] font-semibold; }
+  .evidence-filter > div { @apply flex flex-wrap items-center gap-2; }
+  .evidence-filter input { @apply min-h-10 min-w-0 flex-1 basis-48 rounded-lg border border-control-line bg-surface px-3 py-2 text-[12px]; }
+  .evidence-filter input::placeholder { @apply text-subtle; }
+  .evidence-filter > div > svg { @apply shrink-0 text-muted; }
+  .evidence-filter > p { @apply mt-2 text-[11px] leading-relaxed text-muted; }
+  .evidence-page-summary { @apply mb-3 text-[12px] font-medium text-muted; }
+  .evidence-scroll-hint { @apply mb-3 text-[11px] leading-relaxed text-muted; }
+  .evidence-table-scroll { @apply w-full min-w-0 overflow-x-auto rounded-lg border border-line; }
+  .evidence-table { @apply w-full min-w-[1250px] border-collapse text-left text-[12px] leading-relaxed; }
+  .evidence-table th { @apply border-b border-line bg-canvas px-3 py-3 text-[11px] font-semibold text-muted; }
+  .evidence-table td { @apply border-b border-line px-3 py-3 align-top; }
+  .evidence-table tbody > tr:last-child > td { @apply border-b-0; }
+  .evidence-table tbody > tr:hover { @apply bg-primary-soft; }
+  .evidence-source-cell { @apply min-w-28 max-w-48; }
+  .evidence-message-cell { @apply min-w-64 max-w-96; }
+  .evidence-table .evidence-manual-column { @apply bg-accent-soft; }
+  .evidence-inspect { @apply min-h-9 px-2.5 text-[11px]; }
+  .evidence-value { @apply whitespace-pre-wrap; overflow-wrap: anywhere; }
+  .evidence-missing { @apply text-subtle; }
+  .evidence-empty { @apply rounded-lg border border-dashed border-line-strong bg-canvas p-5; }
+  .evidence-empty h2, .evidence-empty h3 { @apply text-[16px] font-semibold; }
+  .evidence-empty p { @apply my-3 max-w-xl text-[12px] leading-relaxed text-muted; }
+  .evidence-pagination { @apply mt-5 flex flex-wrap items-center justify-between gap-3; }
+  .evidence-pagination > span { @apply text-[11px] text-muted; }
+  .evidence-detail-dialog { @apply fixed inset-y-4 left-auto right-4 m-0 h-[calc(100dvh-2rem)] max-h-none w-[min(720px,calc(100vw-2rem))] max-w-none overflow-hidden rounded-xl border border-line bg-surface p-0 text-ink shadow-panel; }
+  .evidence-detail-dialog[open] { @apply flex flex-col; }
+  .evidence-detail-dialog::backdrop { background: var(--color-backdrop); }
+  .evidence-detail-header { @apply flex shrink-0 items-start justify-between gap-3 border-b border-line bg-surface p-5 sm:p-6; }
+  .evidence-detail-header > div { @apply min-w-0; }
+  .evidence-detail-header h2 { @apply mt-2 text-[20px] font-semibold leading-snug; }
+  .evidence-detail-header p { @apply mt-2 text-[11px] leading-relaxed text-muted; overflow-wrap: anywhere; }
+  .evidence-detail-body { @apply min-h-0 flex-1 overflow-y-auto p-5 sm:p-6; }
+  .evidence-detail-body:focus-visible { outline-offset: -4px; }
+  .evidence-detail-section { @apply mb-6; }
+  .evidence-detail-section h3 { @apply text-[14px] font-semibold; }
+  .evidence-detail-section > p { @apply mb-3 mt-2 text-[11px] leading-relaxed text-muted; }
+  .evidence-fields { @apply mt-3 grid gap-4 sm:grid-cols-2; }
+  .evidence-fields > div { @apply min-w-0; }
+  .evidence-fields dt { @apply mb-1.5 text-[11px] font-medium text-muted; }
+  .evidence-fields dd { @apply text-[12px] leading-relaxed; overflow-wrap: anywhere; }
+  .evidence-manual-section { @apply rounded-lg border border-line bg-accent-soft p-4; }
+  .evidence-raw-payload { @apply rounded-lg border border-line bg-canvas p-4 text-[12px]; }
+  .evidence-raw-payload summary { @apply cursor-pointer rounded-sm font-semibold leading-relaxed; }
+  .evidence-raw-payload pre { @apply mt-4 whitespace-pre-wrap rounded bg-surface p-3 text-[11px] leading-relaxed; overflow-wrap: anywhere; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
   }

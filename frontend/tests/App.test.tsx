@@ -58,6 +58,8 @@ describe('TraceSync application shell', () => {
     await user.click(within(navigation).getByRole('link', { name: label }));
     expect(screen.getByRole('heading', { level: 1, name: label })).toBeInTheDocument();
     if (label === 'Projects') expect(await screen.findByText('No projects yet')).toBeInTheDocument();
+    else if (label === 'Upload Reports') expect(screen.getByRole('heading', { name: 'Choose a project and upload cycle' })).toBeInTheDocument();
+    else if (label === 'Evidence Explorer') expect(screen.getByRole('heading', { name: 'Choose a project and upload cycle' })).toBeInTheDocument();
     else expect(screen.getByRole('heading', { name: 'This screen is not available yet' })).toBeInTheDocument();
     expect(within(navigation).getByRole('link', { name: label })).toHaveClass('nav-link-active');
     expect(navigation.querySelectorAll('[aria-current="page"]')).toHaveLength(1);

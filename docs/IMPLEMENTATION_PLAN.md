@@ -1,17 +1,17 @@
 # TraceSync implementation plan
 
-## Updated frontend sequence — Prompt 0.5
+## Updated frontend sequence — Prompt 0.7
 
-**Current milestone: Prompt 0.5 — Projects and Upload Cycles.** Replace only the Projects placeholder with real paginated project/cycle retrieval and creation through the four existing FastAPI endpoints. Share validated fetched metadata and selected IDs in React memory; changing projects clears the active cycle. The header and compact Overview reflect selection. Preserve the five-item navigation, hidden Reconciliation/Radar routes, educational onboarding, design tokens and backend. Stop for visual and functional review before implementing another screen.
+**Current milestone: Prompt 0.7 — Evidence Explorer.** Replace only the evidence placeholder with three read-only datasets using existing paginated GET endpoints. Show raw object/finding/tool fields and source rows, keep imported manual annotations separate, and provide full provenance/raw payload/normalized identity in an accessible detail drawer. Load 25 records per server page; page filtering must be explicitly scoped because no backend search exists. Preserve repeated findings, missing identities, all earlier workflows and the backend. Reset pages/details on tab/cycle changes and ignore stale responses. Stop for review before implementing another screen.
 
-The user has authorized incremental frontend development after successful backend Prompt 0.3A acceptance testing. Prompt 0.5 follows the completed foundation, onboarding and palette milestones and supersedes the older recommendation below to implement reconciliation next. It does not authorize the full Overview dashboard, upload UI, evidence tables, reconciliation, reports, AI or authentication.
+The user has authorized incremental frontend development after successful backend Prompt 0.3A acceptance testing. Prompt 0.7 follows the foundation, onboarding, palette, Projects/Cycles and Upload Reports milestones. It authorizes evidence inspection only, with no reconciliation, root-cause grouping, report generation, editing or authentication. Verify component/browser behavior, real HTTP evidence pagination using synthetic workbooks, lint, TypeScript, build and backend regression tests. The broader roadmap below remains proposed future work.
 
 - Prompt 0.4A provides only the React/TypeScript/Vite/Tailwind foundation, shared responsive navigation, minimal Overview, consistent future-screen placeholders and an unused typed API client. The backend remains unchanged.
 - Verify component behavior, real desktop/mobile rendering, keyboard navigation, TypeScript, production build and the backend suite. See [frontend/README.md](../frontend/README.md) for Windows commands.
 - Leave a local development preview available for visual review. Do not automatically commit or push.
 - Prompt 0.4B is the functional Overview and requires visual approval first. Each later screen is a separate milestone. No reconciliation, upload UI, evidence tables, reports, AI or authentication is authorized by Prompt 0.4A.
 
-Plan based on [Project_Reference.md](Project_Reference.md) and the inspected schemas. Updated on 2026-10-25 for a solo developer. Prompt 0.1 discovery, Prompt 0.2 foundation and Prompt 0.3 ingestion are complete. Prompt 0.5 adds only frontend Projects/Cycles integration. Reconciliation and later business workflows remain future work.
+Plan based on [Project_Reference.md](Project_Reference.md) and verified schemas. Updated on 2026-10-26. Discovery, ingestion, Projects/Cycles and uploads are complete; Prompt 0.7 adds read-only Evidence Explorer. Reconciliation and later business workflows remain future work.
 
 ## Current boundary — Prompt 0.3 ingestion complete
 

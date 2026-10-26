@@ -1,11 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/liveFixture';
 
-// Opt-in: this test writes fictional projects/cycles to a real local FastAPI.
-// Use a separately migrated test database as documented in frontend/README.md.
-test('live FastAPI persists project/cycle creation through the browser', async ({ page, request }) => {
-  const api = process.env.TRACESYNC_LIVE_API_URL?.replace(/\/$/, '');
-  test.skip(!api, 'Set TRACESYNC_LIVE_API_URL and start an isolated FastAPI backend to run this integration test.');
-  if (!api) return;
+// The live launcher owns the migrated database and discards it after this run.
+test('live FastAPI persists project/cycle creation through the browser', async ({ page, request, verifiedLiveApi: api }) => {
   const suffix = Date.now();
   const projectName = `Synthetic acceptance ${suffix}`;
   const cycleName = `Acceptance run ${suffix}`;
@@ -23,7 +19,7 @@ test('live FastAPI persists project/cycle creation through the browser', async (
   await page.getByRole('button', { name: 'Create project', exact: true }).click();
   const projectHttp = await projectResponse;
   expect(projectHttp.status()).toBe(201);
-  expect(projectHttp.headers()['access-control-allow-origin']).toBe('http://127.0.0.1:5173');
+  expect(projectHttp.headers()['access-control-allow-origin']).toBe(new URL(page.url()).origin);
   expect(projectHttp.headers()['x-request-id']).toBeTruthy();
   const project = await projectHttp.json() as { id: string; name: string };
   expect(project.name).toBe(projectName);
