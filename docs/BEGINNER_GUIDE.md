@@ -48,9 +48,9 @@ Use [SENIOR_QUESTIONS.md](SENIOR_QUESTIONS.md) at each stage. We will turn answe
 5. **Separated observations from decisions.** Seeing 203 message blocks is an observation. Deciding that every message in a block belongs to its terminal object is a rule requiring validation. Discovery proposes the rule without silently implementing it.
 6. **Documented the next small steps.** Each milestone has something concrete to demonstrate and verify. This keeps the project manageable for one developer.
 
-The inspector was the only executable utility created during Prompt 0.1. It reads workbook structure and reports metadata; it does not decide matches or customer actions. SHA-256 is a content fingerprint: equal before/after fingerprints verify that the original file bytes did not change during inspection. A hash does not prove business correctness or remove sensitive information.
+The inspector was the only executable utility created during project initialization and dataset discovery. It reads workbook structure and reports metadata; it does not decide matches or customer actions. SHA-256 is a content fingerprint: equal before/after fingerprints verify that the original file bytes did not change during inspection. A hash does not prove business correctness or remove sensitive information.
 
-## What Prompt 0.2 adds
+## What the backend foundation adds
 
 The backend foundation now runs as **TraceSync API**. `/api/v1/health` asks whether the HTTP service is running; `/api/v1/ready` asks whether it can connect to the database. Readiness does not yet check schema currency or customer access. Swagger at `/docs` lets you inspect these endpoints without building a frontend.
 
@@ -58,13 +58,13 @@ Pydantic Settings reads safe defaults, your ignored root `.env`, and environment
 
 The 25 foundation tests exercise real behavior using temporary databases and synthetic values. They do not touch the original workbooks or the development database. A request ID ties a response to metadata logs without logging customer messages or request credentials. See [backend/README.md](../backend/README.md) for commands and verification results.
 
-## What Prompt 0.3 adds
+## What Excel ingestion adds
 
 You can now create a project and cycle, upload each source workbook, and retrieve its saved evidence. Three small adapters translate the known worksheet layouts into structured records. A separate persistence service saves the workbook metadata and all rows in one **transaction**: everything succeeds together, or the database rolls back the upload. Re-uploading identical bytes returns the existing workbook; different bytes for the occupied role require a new cycle.
 
 Raw evidence and normalized keys answer different questions. Raw text shows exactly what the source cell said, including its whitespace; normalized keys make later comparisons consistent. A normalized key is not a match result, a customer decision or evidence of access. Manual annotations remain separate from the tool's outcome. Excel row numbers make it possible to go back to the original cell.
 
-The default tests and demo workbooks use fictional data generated from committed Python source. A second Windows laptop can install the declared dependencies, run migrations to create its own database, and generate those inputs without company files. An automated test exercises a fresh source copy under a different folder name with spaces and outbound network calls blocked. Initial installation still needs package access, and an actual second laptop has not been tested. Prompt 0.3 adds no Docker or setup/launch scripts.
+The default tests and demo workbooks use fictional data generated from committed Python source. A second Windows laptop can install the declared dependencies, run migrations to create its own database, and generate those inputs without company files. An automated test exercises a fresh source copy under a different folder name with spaces and outbound network calls blocked. Initial installation still needs package access, and an actual second laptop has not been tested. The ingestion stage adds no Docker or setup/launch scripts.
 
 ## How the future application fits together
 

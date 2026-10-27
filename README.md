@@ -2,7 +2,7 @@
 
 TraceSync helps transformation leads compare an initial transformation report with a post-upload report, inspect the supporting messages, and prepare a reviewed customer Excel report. Today this involves manually mapping objects and errors between spreadsheets. The intended application preserves that evidence while reducing repetitive copying and comparison.
 
-**Current stage: Prompt 0.7 — functional Evidence Explorer.** The frontend manages Projects/Cycles and shared workspace selection, imports the two source workbooks and now displays their evidence in separate read-only datasets. Server-backed pages, explicitly scoped page filtering and record-detail drawers preserve raw values, normalized identities, manual/tool distinctions and source provenance. The responsive shell, Overview, guide, uploads and backend are preserved. Reconciliation, customer export and AI remain future work.
+**Current stage: functional Evidence Explorer.** The frontend manages Projects/Cycles and shared workspace selection, imports the two source workbooks and now displays their evidence in separate read-only datasets. Server-backed pages, explicitly scoped page filtering and record-detail drawers preserve raw values, normalized identities, manual/tool distinctions and source provenance. The responsive shell, Overview, guide, uploads and backend are preserved. Reconciliation, customer export and AI remain future work.
 
 ## Intended workflow
 
@@ -93,10 +93,10 @@ The utility assumes the inspected tabular sheets use row 1 for headers. It repor
 - [Business rules](docs/mapping-rules.md): dated user-confirmed guidance and remaining interpretation limits.
 - [Questions for seniors](docs/SENIOR_QUESTIONS.md): current priorities and a question list for each build stage.
 - [Original project reference](docs/Project_Reference.md): broader proposed specification; unchanged.
-- [Backend setup](backend/README.md): fresh-clone Windows prerequisites, installation/migrations, synthetic ingestion walkthrough, endpoint contract and verified Prompt 0.3 results.
+- [Backend setup](backend/README.md): fresh-clone Windows prerequisites, installation/migrations, synthetic ingestion walkthrough, endpoint contract and verified ingestion results.
 - [Frontend setup](frontend/README.md): Windows commands, Projects/Cycles, uploads, read-only Evidence Explorer, pagination/filter limits and synthetic controlled/live browser verification.
 
-Default backend tests use fictional workbooks and fresh temporary databases. Frontend component and controlled browser tests need no company data or backend. `npm run test:browser:live` owns separate test servers on ports 8001/5174, migrates a new database per run, and discards its verified database after success or failure. It cannot reuse the normal API on port 8000. See [Test data isolation](docs/TEST_DATA_ISOLATION.md) for the retained acceptance-data investigation and exact normal startup commands. Development proceeds one screen at a time; Prompt 0.7 stops at Evidence Explorer for review. Message-block linkage, scope evidence and unresolved report rules remain questions for later reconciliation work.
+Default backend tests use fictional workbooks and fresh temporary databases. Frontend component and controlled browser tests need no company data or backend. `npm run test:browser:live` owns separate test servers on ports 8001/5174, migrates a new database per run, and discards its verified database after success or failure. It cannot reuse the normal API on port 8000. See [Test data isolation](docs/TEST_DATA_ISOLATION.md) for the retained acceptance-data investigation and exact normal startup commands. Development proceeds one screen at a time; the current frontend workflow ends at Evidence Explorer. Message-block linkage, scope evidence and unresolved report rules remain questions for later reconciliation work.
 
 ## Local data and Git
 

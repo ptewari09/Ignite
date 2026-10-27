@@ -1,6 +1,6 @@
 # TraceSync API
 
-Prompt 0.3 adds project/cycle management, validated XLSX ingestion, transactional evidence persistence and paginated evidence retrieval. Prompt 0.2 health/readiness, configuration and logging remain in place. The API preserves evidence and normalized comparison keys; it does not reconcile errors, infer scope/access, link parent components, approve actions or generate customer reports.
+The backend provides project/cycle management, validated XLSX ingestion, transactional evidence persistence and paginated evidence retrieval. Existing health/readiness, configuration and logging remain in place. The API preserves evidence and normalized comparison keys; it does not reconcile errors, infer scope/access, link parent components, approve actions or generate customer reports.
 
 ## Requirements and PowerShell setup
 
@@ -155,7 +155,7 @@ Known text fields preserve whitespace and nulls separately from normalized type/
 
 For the same cycle/role, identical bytes return **HTTP 200**, `duplicate: true`, and the original metadata without adding rows. A new ingestion returns **HTTP 201**, `duplicate: false`. Different bytes for an occupied role return **HTTP 409**, `WORKBOOK_ROLE_OCCUPIED`; create a new cycle rather than replace evidence. Equality is byte/hash equality, so even a workbook metadata change can produce a conflict. Missing/malformed structure returns HTTP 422, unsupported extension HTTP 415, and size excess HTTP 413. Parse and persistence failures cannot leave partial source rows.
 
-**Raw evidence** records what the workbook actually said. **Normalized keys** prepare identities for later comparisons. **Reconciliation results** would describe matches and finding differences; they are not produced in Prompt 0.3. In particular, an absent report identity is not automatically an out-of-scope object under the shared-TR business rules.
+**Raw evidence** records what the workbook actually said. **Normalized keys** prepare identities for later comparisons. **Reconciliation results** would describe matches and finding differences; they are not produced by the ingestion layer. In particular, an absent report identity is not automatically an out-of-scope object under the shared-TR business rules.
 
 Readiness currently checks **connectivity**, not migration currency or write permissions. A connectable but unmigrated SQLite file can pass it. Always run migrations before development; schema-aware readiness can be added when application operations require it. SQLite may create an empty database file on the first connection if its parent directory exists; that does not create any application tables.
 
@@ -182,7 +182,7 @@ Confidential-file verification is a separate opt-in and must only run on a lapto
 & .\backend\.venv\Scripts\python.exe -m pytest -c backend/pyproject.toml backend/tests/integration/test_local_samples.py --run-local-samples -q -s
 ```
 
-Verified on 2026-10-24 with Python 3.12.4: the default suite has **67 passing tests and one intentionally skipped local-data check**; running the whole suite with `--run-local-samples` gives **68 passed**. `pip check` reported no broken requirements. A real Uvicorn process ingested both synthetic roles, returned duplicate HTTP 200, served paginated evidence and reported cycle status `complete`; its metadata log contained no source values. The verification server was stopped afterward. The upstream Starlette/HTTPX TestClient deprecation warning from Prompt 0.2 remains; tests pass.
+Verified on 2026-10-24 with Python 3.12.4: the default suite has **67 passing tests and one intentionally skipped local-data check**; running the whole suite with `--run-local-samples` gives **68 passed**. `pip check` reported no broken requirements. A real Uvicorn process ingested both synthetic roles, returned duplicate HTTP 200, served paginated evidence and reported cycle status `complete`; its metadata log contained no source values. The verification server was stopped afterward. The upstream Starlette/HTTPX TestClient deprecation warning observed during backend foundation verification remains; tests pass.
 
 Actual local sample ingestion matched discovery exactly: `Detailed_LOG` **361**, `Objects` **205**, `Errors` **1,226**. Every raw payload and Excel row location was compared with the original, repeated identities were retained, and manual/tool fields were checked separately. All three original workbook hashes remained unchanged; the third workbook was hashed only, not ingested. This isolated local verification took about **2.23 seconds** including readback checks on the development laptop; it is not a measured review-time saving or matching-accuracy result.
 

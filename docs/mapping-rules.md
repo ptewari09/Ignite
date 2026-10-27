@@ -67,7 +67,7 @@ These are future acceptance examples, not implemented rules or executed tests. T
 
 **Status:** usual process confirmed by the user on 2026-10-24, answering the mechanism portion of Q0.2. The user said customers mostly add the object to the shared TR or provide another TR. Preserve this as the usual process, not an exhaustive guarantee about every case.
 
-For future reviewed reports, a lead can request the appropriate TR addition/provision after customer revalidation. Do not infer that a TR has been updated, access is operational, or the object is ready for the second run until supporting confirmation exists. Decision authority, response evidence and denial/no-response handling remain open. No TR integration or automatic scope change is implemented in Prompt 0.2.
+For future reviewed reports, a lead can request the appropriate TR addition/provision after customer revalidation. Do not infer that a TR has been updated, access is operational, or the object is ready for the second run until supporting confirmation exists. Decision authority, response evidence and denial/no-response handling remain open. TR integration and automatic scope changes remain unimplemented.
 
 ## Change record
 

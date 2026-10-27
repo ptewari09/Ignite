@@ -1,19 +1,19 @@
 # TraceSync implementation plan
 
-## Updated frontend sequence — Prompt 0.7
+## Frontend sequence — Evidence Explorer
 
-**Current milestone: Prompt 0.7 — Evidence Explorer.** Replace only the evidence placeholder with three read-only datasets using existing paginated GET endpoints. Show raw object/finding/tool fields and source rows, keep imported manual annotations separate, and provide full provenance/raw payload/normalized identity in an accessible detail drawer. Load 25 records per server page; page filtering must be explicitly scoped because no backend search exists. Preserve repeated findings, missing identities, all earlier workflows and the backend. Reset pages/details on tab/cycle changes and ignore stale responses. Stop for review before implementing another screen.
+**Frontend stage: Evidence Explorer.** Replace only the evidence placeholder with three read-only datasets using existing paginated GET endpoints. Show raw object/finding/tool fields and source rows, keep imported manual annotations separate, and provide full provenance/raw payload/normalized identity in an accessible detail drawer. Load 25 records per server page; page filtering must be explicitly scoped because no backend search exists. Preserve repeated findings, missing identities, all earlier workflows and the backend. Reset pages/details on tab/cycle changes and ignore stale responses. Stop for review before implementing another screen.
 
-The user has authorized incremental frontend development after successful backend Prompt 0.3A acceptance testing. Prompt 0.7 follows the foundation, onboarding, palette, Projects/Cycles and Upload Reports milestones. It authorizes evidence inspection only, with no reconciliation, root-cause grouping, report generation, editing or authentication. Verify component/browser behavior, real HTTP evidence pagination using synthetic workbooks, lint, TypeScript, build and backend regression tests. The broader roadmap below remains proposed future work.
+The user has authorized incremental frontend development after successful end-to-end backend acceptance testing. The Evidence Explorer stage follows the foundation, onboarding, palette, Projects/Cycles and Upload Reports milestones. It authorizes evidence inspection only, with no reconciliation, root-cause grouping, report generation, editing or authentication. Verify component/browser behavior, real HTTP evidence pagination using synthetic workbooks, lint, TypeScript, build and backend regression tests. The broader roadmap below remains proposed future work.
 
-- Prompt 0.4A provides only the React/TypeScript/Vite/Tailwind foundation, shared responsive navigation, minimal Overview, consistent future-screen placeholders and an unused typed API client. The backend remains unchanged.
+- The frontend foundation provides only the React/TypeScript/Vite/Tailwind setup, shared responsive navigation, minimal Overview, consistent future-screen placeholders and an unused typed API client. The backend remains unchanged.
 - Verify component behavior, real desktop/mobile rendering, keyboard navigation, TypeScript, production build and the backend suite. See [frontend/README.md](../frontend/README.md) for Windows commands.
 - Leave a local development preview available for visual review. Do not automatically commit or push.
-- Prompt 0.4B is the functional Overview and requires visual approval first. Each later screen is a separate milestone. No reconciliation, upload UI, evidence tables, reports, AI or authentication is authorized by Prompt 0.4A.
+- The functional Overview dashboard requires visual approval before implementation. Each later screen is a separate milestone. No reconciliation, upload UI, evidence tables, reports, AI or authentication is part of the frontend foundation stage.
 
-Plan based on [Project_Reference.md](Project_Reference.md) and verified schemas. Updated on 2026-10-26. Discovery, ingestion, Projects/Cycles and uploads are complete; Prompt 0.7 adds read-only Evidence Explorer. Reconciliation and later business workflows remain future work.
+Plan based on [Project_Reference.md](Project_Reference.md) and verified schemas. Updated on 2026-10-26. Discovery, ingestion, Projects/Cycles and uploads are complete; the Evidence Explorer stage adds read-only evidence browsing. Reconciliation and later business workflows remain future work.
 
-## Current boundary — Prompt 0.3 ingestion complete
+## Backend ingestion complete
 
 - Added project/cycle endpoints and one atomic ingestion service for transformation/post-upload workbooks, with explicit source models and Alembic revision `0002_add_ingestion`.
 - Implemented separate `Detailed_LOG`, `Objects` and `Errors` adapters, preserving raw payloads, normalized identity fields, repeated rows, manual annotations and Excel-row provenance.
@@ -21,11 +21,11 @@ Plan based on [Project_Reference.md](Project_Reference.md) and verified schemas.
 - Added fictional source-controlled generators, synthetic parser/API tests and a source-copy portability test with a fresh migrated database and outbound connections blocked. Default suite: 67 passed, one opt-in company-data check skipped. The full suite with local verification enabled passed all 68 tests, including counts 361 / 205 / 1,226 and unchanged originals.
 - Documented fresh Windows setup, configurable limits, synthetic upload/retrieval commands and the remaining second-laptop setup steps in [backend/README.md](../backend/README.md). Initial package installation needs network; ingestion does not. No Docker or setup/launch automation was added.
 
-Prompt 0.3 did not approve customer actions, infer scope from source absence, group blockers, build UI or generate reports. The subsequent frontend scope is described above; reconciliation remains deferred.
+The ingestion stage did not approve customer actions, infer scope from source absence, group blockers, build UI or generate reports. The subsequent frontend scope is described above; reconciliation remains deferred.
 
-## Prompt 0.2 backend foundation complete
+## Backend foundation complete
 
-The attached Prompt 0.2 narrows this step to a foundation, not the full ingestion milestone below. It supplies:
+The backend foundation establishes the basic service before the ingestion milestone below. It supplies:
 
 - Isolated Python 3.12 environment, runtime/dev dependencies, tested dependency constraints and root `.env.example`.
 - `TraceSync API` application factory with `/api/v1/health`, database connectivity `/api/v1/ready`, local CORS, centralized errors and request metadata logging.
@@ -34,9 +34,9 @@ The attached Prompt 0.2 narrows this step to a foundation, not the full ingestio
 - Twenty-five passing isolated tests, dependency consistency check and real Uvicorn health/readiness/OpenAPI/Swagger verification. One upstream Starlette/HTTPX TestClient deprecation warning remains documented.
 - Beginner-friendly [backend setup instructions](../backend/README.md).
 
-The development database is local and gitignored. At the end of Prompt 0.2 there was no ingestion, project CRUD or cycle/source evidence model. Prompt 0.3 adds those ingestion features above; reconciliation, frontend, AI, authentication and Docker remain unimplemented.
+The development database is local and gitignored. At the end of the backend foundation stage there was no ingestion, project CRUD or cycle/source evidence model. The ingestion stage subsequently added those features; reconciliation, frontend, AI, authentication and Docker were outside that stage.
 
-## Prompt 0.1 — initialization and discovery complete
+## Initialization and dataset discovery complete
 
 Completed:
 
@@ -47,7 +47,7 @@ Completed:
 - Added a reusable read-only inspector and expanded `.gitignore` coverage.
 - Added beginner documentation explaining the product, layers and engineering decisions.
 
-At the end of Prompt 0.1 there were no application routes or database tables. The original files and project reference remain unchanged. Import adapters were subsequently added in Prompt 0.3; reconciliation rules, UI, report generation and AI remain future work.
+At the end of dataset discovery there were no application routes or database tables. The original files and project reference remain unchanged. Import adapters were subsequently added during ingestion development; reconciliation rules, UI, report generation and AI were outside the discovery scope.
 
 Verification performed for this step:
 
@@ -57,19 +57,19 @@ Verification performed for this step:
 - Exercised missing-input and input-overwrite rejection, checked Python syntax and checked local documentation links.
 - Checked 21 representative sensitive/generated paths are ignored and six intended source/documentation/example paths remain eligible for Git. No dataset is currently tracked; `git diff --check` passed for the tracked change.
 
-Those checks cover the discovery utility, not matching accuracy. The separate Prompt 0.2 foundation tests are described above.
+Those checks cover the discovery utility, not matching accuracy. The separate backend foundation tests are described above.
 
 ## Before ingestion/reconciliation — confirm rules and prepare fixtures
 
 Use the [stage-specific questions for seniors](SENIOR_QUESTIONS.md), starting with scope/access mechanics and message-block semantics. Record answers in [mapping-rules.md](mapping-rules.md) with source, date, examples and acceptance checks. BR-001 records customer reporting of out-of-scope objects; BR-002 defines them by absence from the shared TR; BR-003 records that customers usually add the object to that TR or provide another TR. Authoritative membership evidence, label ownership, decision/response evidence, other inclusion rules, repeated object rows and recheck membership still require clarification. Clearly distinguish confirmed requirements from proposals.
 
-Prompt 0.3 supplies **synthetic** workbook fixtures covering verified layouts, padding, blank identifiers, repeated keys, several findings and formatting-only rows. Extend these when new verified rules require more cases. Keep supplied internal workbooks local and ignored; committed fixtures must not copy their identifiers or free text.
+The ingestion stage supplies **synthetic** workbook fixtures covering verified layouts, padding, blank identifiers, repeated keys, several findings and formatting-only rows. Extend these when new verified rules require more cases. Keep supplied internal workbooks local and ignored; committed fixtures must not copy their identifiers or free text.
 
 **Exit check:** every adapter field maps to an actual source column; unconfirmed rules have a visible review fallback. Unresolved inclusion rules need not block ingestion, but must block automatic inclusion/approval. Unconfirmed block semantics must not enable automatic parent linkage.
 
 ## Milestone 1 — local backend and ingestion
 
-**Progress:** the foundation and ingestion portions are complete under Prompts 0.2–0.3. This milestone's upload/parsing/persistence scope is implemented; reconciliation remains separate.
+**Progress:** the backend foundation and ingestion portions are complete. This milestone's upload/parsing/persistence scope is implemented; reconciliation remains separate.
 
 **Deliverable:** both source files upload and return verified counts and source-row provenance.
 
@@ -143,4 +143,4 @@ Document exact local start commands, versioned dependencies, backup synthetic da
 - Consider a warning when manual labels disagree with broad tool status, and a visible unsupported-context queue. These small additions address observed data issues without changing business decisions.
 - Use synthetic fixtures to make demonstrations repeatable and privacy-conscious. Avoid polishing secondary features before the export can be trusted.
 
-The user will authorize each next implementation task. Prompt 0.3 authorizes the completed ingestion scope only; this future plan does not authorize advancing into reconciliation.
+Each implementation stage requires separate authorization; this roadmap alone does not authorize new application work.

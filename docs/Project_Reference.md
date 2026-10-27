@@ -595,7 +595,7 @@ Tasks:
 
 Tasks:
 1. Define `AIExplainer` interface with disabled/local-template mode and optional approved provider mode.
-2. Build structured prompt from selected evidence only.
+2. Build a structured explanation request from selected evidence only.
 3. Require typed JSON output with source IDs and uncertainty.
 4. Validate references; fall back on deterministic explanation when unavailable.
 5. Show AI text as a suggestion, never as a verified conclusion.
@@ -623,27 +623,27 @@ Tasks:
 
 ---
 
-## 17. Suggested Codex execution prompts
+## 17. Implementation work packages
 
-### Prompt 1 — Start with evidence, not implementation guesses
+### Dataset discovery
 
-> Read `docs/PROJECT_REFERENCE.md` and inspect the three workbooks under `data/samples/`. Inspect every sheet and document actual headers, types, row counts, missing fields, linkage candidates and ambiguity in `docs/data-dictionary.md`. Do not implement matching until this discovery is complete. Summarize questions that cannot be answered from the files. Do not upload data externally or commit it.
+Inspect all three source/reference workbooks and document actual headers, types, row counts, missing fields, linkage candidates and ambiguity. Complete schema discovery before implementing matching. Record questions the files cannot answer. Keep source data local and uncommitted.
 
-### Prompt 2 — Implement the core backend
+### Core backend
 
-> Using the verified data dictionary, implement Milestones 1 and 2. Use FastAPI, Pydantic, SQLAlchemy, pandas and openpyxl. Preserve raw evidence, implement conservative object matching and error comparison, and write pytest tests for exact, ambiguous, unmatched and multiple-message cases. Do not infer business dispositions from error categories without verified rules. Show the tests run and their results.
+Use the verified data dictionary to guide backend ingestion and reconciliation. Preserve raw evidence, compare object identities conservatively and keep error comparison separate. Cover exact, ambiguous, unmatched and multiple-message cases with tests. Business dispositions require verified rules; record actual test results.
 
-### Prompt 3 — Implement review and export
+### Review and export
 
-> Implement Milestones 3 and 4 with React/TypeScript/Tailwind and a reviewable Excel export. The reviewer must inspect source provenance, edit disposition and action, approve findings and download the report. Use the supplied customer workbook only as a reference for format and evaluation. Keep unknown business rules configurable; do not silently invent customer actions.
+Provide source-provenance inspection, editable reviewer decisions and actions, explicit approval and a reviewable Excel export. Use the customer workbook only as a format/evaluation reference. Keep unknown business rules configurable and never invent customer actions.
 
-### Prompt 4 — Add the differentiator
+### Smart Blocker Radar
 
-> Implement Smart Blocker Radar as specified in Milestone 5. Extract shared identifiers from actual upload messages, group only evidence-supported candidates, show affected distinct objects and allow confirm/dismiss. Add tests demonstrating both valid grouping and rejection of same-category-only false positives. Do not use an LLM to create grouping facts.
+Group findings only when actual upload messages support shared identifiers. Show distinct affected objects, grouping evidence and confirm/dismiss controls. Verify both valid grouping and rejection of same-category-only false positives. An LLM must not create grouping facts.
 
-### Prompt 5 — Finish and rehearse
+### Verification and demo preparation
 
-> Run all tests and the complete workflow against the approved sample files. Record actual counts, processing time, reconciliation metrics and report differences. Produce a `DEMO.md` with exact commands, a 7-minute live walkthrough, backup local setup instructions and honest known limitations. Do not claim unmeasured accuracy or time savings.
+Exercise the full workflow against approved samples and record actual counts, processing time, reconciliation metrics and report differences. Maintain exact local commands, a seven-minute walkthrough, backup setup instructions and honest limitations in the demo guide. Do not claim unmeasured accuracy or time savings.
 
 ---
 

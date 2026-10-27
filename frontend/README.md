@@ -1,8 +1,8 @@
 # TraceSync frontend
 
-Prompt 0.7 adds the functional **Evidence Explorer** to the existing Projects/Cycles and Upload Reports workflow. Select a workspace, import its source workbooks, then inspect paginated transformation findings, upload objects and technical messages with original provenance. The five navigation entries, compact Overview, educational guide and design system are preserved. Customer Reports and the two hidden future routes remain placeholders. Reconciliation, approvals, reporting, authentication and AI remain future work.
+The frontend provides the functional **Evidence Explorer** to the existing Projects/Cycles and Upload Reports workflow. Select a workspace, import its source workbooks, then inspect paginated transformation findings, upload objects and technical messages with original provenance. The five navigation entries, compact Overview, educational guide and design system are preserved. Customer Reports and the two hidden future routes remain placeholders. Reconciliation, approvals, reporting, authentication and AI remain future work.
 
-Prompt 0.4A.2 applies the shared blue, white and red-violet palette to that existing interface. It changes presentation only, with no new dependencies or changes to routes, onboarding behavior or the API client.
+The palette refinement applies the shared blue, white and red-violet colors to that existing interface. It changes presentation only, with no new dependencies or changes to routes, onboarding behavior or the API client.
 
 ## Windows prerequisites
 
@@ -79,7 +79,7 @@ if (-not (Test-Path -LiteralPath '.env.local')) {
 npm.cmd run dev
 ```
 
-Open **http://127.0.0.1:5173/projects**, select a project and cycle, then open **Upload Reports** to import files and **Evidence Explorer** to browse their source rows. The default API URL is `http://127.0.0.1:8000/api/v1`; frontend `.env.local` can override `VITE_API_BASE_URL`. Backend CORS already permits `http://127.0.0.1:5173` and `http://localhost:5173`. No backend change is required. Leave both server terminals running; use another terminal for tests. Press **Ctrl+C** in a server terminal to regain its command prompt. Later launches can omit installation; keep migrations current before starting FastAPI.
+Open **http://127.0.0.1:5173/projects**, select a project and cycle, then open **Upload Reports** to import files and **Evidence Explorer** to browse their source rows. The default API URL is `http://127.0.0.1:8000/api/v1`; frontend `.env.local` can override `VITE_API_BASE_URL`. Backend CORS already permits `http://127.0.0.1:5173` and `http://localhost:5173`. No backend change is required. Leave both server terminals running; use another terminal for tests. Press **Ctrl+C** in a server terminal to return to the command line. Later launches can omit installation; keep migrations current before starting FastAPI.
 
 The normal database is the configurable, ignored `data/local/tracesync.db`. Alembic creates a fresh schema; the API never creates tables or seeds projects at startup. No existing database, virtual environment, confidential workbook or machine-specific folder is required after cloning and installing dependencies. Browser acceptance tests now use different ports and disposable databases; see [Test data isolation](../docs/TEST_DATA_ISOLATION.md) for the investigation and normal launch commands.
 
@@ -367,21 +367,21 @@ frontend/
 
 Upstream setup references: [Vite](https://vite.dev/guide/), [Tailwind Vite integration](https://tailwindcss.com/docs/installation/using-vite), [React Router](https://reactrouter.com/start/declarative/installation).
 
-Projects/Cycles, Upload Reports and read-only Evidence Explorer are functional through Prompt 0.7. Reconciliation, the full Overview dashboard and customer reporting remain separate future milestones.
+Projects/Cycles, Upload Reports and read-only Evidence Explorer are functional. Reconciliation, the full Overview dashboard and customer reporting remain separate future milestones.
 
-## Prompt 0.4A verification
+## Application shell verification
 
 Verified on 2026-10-24: **19 unit/component tests passed**, **3 real-browser checks passed in Microsoft Edge**, TypeScript checks passed, and the production build succeeded. Desktop and mobile screenshots were inspected. Browser coverage includes widths 320, 390, 768, 1280 and 1440px. The backend suite remained at **67 passed, 1 intentional confidential-data skip**, with its existing Starlette/HTTPX warning; backend source, original workbooks and the existing development database stayed unchanged.
 
 A separate source copy in a new directory with spaces installed from the lockfile using `npm ci --offline` and built without a backend, local env file or existing `node_modules`. It used the installed runtime and npm's existing cache; an actual second laptop has not been exercised. Explicit Tailwind source registration keeps the scan independent of the clone's surrounding folders.
 
-## Prompt 0.4A.1 verification
+## Overview and onboarding verification
 
 The refinement passed **27 unit/component tests**, **6 Microsoft Edge browser checks**, TypeScript validation, **ESLint with zero warnings**, and the production build. The resulting desktop and mobile screens were visually inspected, including the 320px layout. Browser tests verify guide navigation/dismissal/reopening, progress labels, focus restoration, reduced motion, five visible navigation links and preserved hidden routes.
 
-Both manifests/lockfiles were installed with offline `npm ci` in a fresh source directory with spaces; its lint, typecheck and build passed without an existing environment, backend or copied dependency directory. Installed Node and cached packages were reused. The backend regression suite remained **67 passed, 1 intentional skip**, with its existing upstream warning. Backend source, existing database and original workbook hashes stayed unchanged. Prompt 0.4B and backend-connected screens were not started.
+Both manifests/lockfiles were installed with offline `npm ci` in a fresh source directory with spaces; its lint, typecheck and build passed without an existing environment, backend or copied dependency directory. Installed Node and cached packages were reused. The backend regression suite remained **67 passed, 1 intentional skip**, with its existing upstream warning. Backend source, existing database and original workbook hashes stayed unchanged. The full Overview dashboard and backend-connected screens were not started during this stage.
 
-## Prompt 0.4A.2 verification
+## Palette refinement verification
 
 Verified on 2026-10-24: **27 unit/component tests passed**, **6 real-browser checks passed in Microsoft Edge**, **ESLint passed with zero warnings**, TypeScript checks passed, and the production build succeeded. Desktop and **320px** Overview screenshots were visually inspected. Browser coverage includes onboarding interactions, active navigation, placeholder routes, mobile focus containment, keyboard navigation, reduced motion and horizontal overflow.
 
@@ -389,7 +389,7 @@ A targeted real-browser color audit sampled **507 rendered text/background pairs
 
 The palette refinement changes only `src/styles/tokens.css`, `src/styles/app.css`, `index.html` and this README. No package, component logic, API, backend, migration, database or confidential workbook changes were needed. The backend tests were not rerun for this presentation-only refinement; the preceding milestone's results are recorded above. The preview remains at **http://127.0.0.1:5173/overview**. No further screen implementation, commit or push was performed.
 
-## Prompt 0.5 verification
+## Project and cycle management verification
 
 Verified on **2026-10-25**:
 
@@ -410,7 +410,7 @@ The live integration test used **real HTTP requests to unchanged FastAPI on port
 
 The backend still emits its existing upstream Starlette/HTTPX TestClient deprecation warning. Browser tooling emits a harmless inherited color-environment warning. Neither caused a test failure. No backend compatibility defect or new dependency was found. An actual second Windows laptop has not been exercised in this milestone; relative configuration and the existing locked dependencies are preserved. Setup still requires Git, Python 3.12, Node 24, package installation and explicit Alembic migrations. No confidential workbooks or internet services are needed for the project/cycle workflow after installation.
 
-### Files in Prompt 0.5
+### Project and cycle management files
 
 Created:
 
@@ -442,9 +442,9 @@ README.md
 docs/IMPLEMENTATION_PLAN.md
 ```
 
-No backend, migration, workbook, API-client foundation, palette-token, dependency or lockfile changes were made. No commit or push was performed. Prompt 0.5 stops here for visual and functional review.
+No backend, migration, workbook, API-client foundation, palette-token, dependency or lockfile changes were made. No commit or push was performed. Project and cycle management was then paused for visual and functional review.
 
-## Prompt 0.6 verification
+## Report upload verification
 
 Completed verification on **2026-10-26**, using Node 24, Microsoft Edge and the existing Python 3.12 environment:
 
@@ -477,7 +477,7 @@ No application dependencies, cloud services, Docker, startup scripts or backend 
 
 That milestone's preview used the retained synthetic acceptance database. The normal preview now uses `data/local/tracesync.db`; synthetic projects are not seeded into it. Selection still resets on reload. To try new files, create another cycle; occupied roles are never replaced.
 
-### Files in Prompt 0.6
+### Report upload files
 
 Created:
 
@@ -509,9 +509,9 @@ README.md
 docs/IMPLEMENTATION_PLAN.md
 ```
 
-No backend compatibility defect was found. Projects/Cycles, original confidential workbooks, the original database, shared API-client behavior and business rules were preserved. No commit or push was performed. Prompt 0.6 stops here for visual and functional review; Evidence Explorer and later features remain unimplemented.
+No backend compatibility defect was found. Projects/Cycles, original confidential workbooks, the original database, shared API-client behavior and business rules were preserved. No commit or push was performed. Report uploads were then paused for visual and functional review; Evidence Explorer and later features had not yet been implemented.
 
-## Prompt 0.7 verification
+## Evidence Explorer verification
 
 Verified on **2026-10-26**, using Node 24, the existing Python 3.12 backend environment and Microsoft Edge:
 
@@ -531,7 +531,7 @@ The live evidence test used the separate Alembic-migrated database at `data/outp
 
 An earlier unrestricted parallel frontend run hit simultaneous timeouts in existing and new DOM tests. With the worker cap of two, the full suite passed repeatedly without increasing timeouts or disabling rules. Visual inspection also found a selected tab clipped after desktop-to-mobile resizing; horizontal reveal now accounts for focus space and fractional pixels, and a live-browser assertion verifies full visibility. Final screenshots were inspected after the fix. Existing TestClient and terminal-color warnings remain without test failures.
 
-### Demo Portability Check for Prompt 0.7
+### Evidence Explorer portability check
 
 No backend endpoint, schema, migration, application dependency, external service or machine-specific source path was added. Existing two-terminal Windows setup and environment configuration still apply. Source inspection is local and read-only; no evidence contents are logged or saved to browser storage. Generated workbooks, databases and screenshots remain ignored. All three live browser tests ran for this verification. They are now enabled only through `npm run test:browser:live`, with automatic test database isolation and disposal. The confidential-data backend test remained intentionally skipped. A second physical laptop has not been exercised.
 
@@ -539,7 +539,7 @@ That milestone's preview used `data/outputs/frontend-tooling/evidence-0.7/accept
 
 Known limits: fixed page size 25; filtering covers only the currently loaded records; global search/sorting are not supported by the current API; raw values are read-only; records are listed in the backend's worksheet-row/ID order. Normalized values are comparison keys, never evidence of reconciliation. No matching, root-cause grouping, customer actions, evidence editing or reporting was added.
 
-### Files in Prompt 0.7
+### Evidence Explorer files
 
 Created:
 
@@ -571,4 +571,4 @@ README.md
 docs/IMPLEMENTATION_PLAN.md
 ```
 
-Existing uncommitted Prompt 0.6 changes were preserved. No commit or push was made. Prompt 0.7 stops here for visual and functional review.
+Existing uncommitted report-upload changes were preserved. No commit or push was made. Evidence Explorer was then paused for visual and functional review.
