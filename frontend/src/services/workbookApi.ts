@@ -54,6 +54,7 @@ export function reportError(failure: unknown, phase: 'upload' | 'list' = 'upload
       UNSUPPORTED_CELL: 'A formula or Excel error cell was found. Supply a values-only .xlsx export.',
       INVALID_HEADERS: 'Check that every populated column has a text header in Excel row 1.',
       AMBIGUOUS_HEADERS: 'Some headers are duplicates after whitespace normalization. Use distinct headers.',
+      AMBIGUOUS_LAYOUT: 'Multiple supported worksheet layouts were found. Choose an export containing exactly one accepted layout.',
       INVALID_SEQUENCE: 'The Errors worksheet must contain integers or blank values in S.No.',
       WORKSHEET_LIMIT: 'A worksheet exceeds a configured row or column limit. Ask your administrator to check the report layout.',
       INVALID_FILENAME: 'Use a filename without control characters and no more than 255 characters.',

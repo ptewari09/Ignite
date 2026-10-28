@@ -1,10 +1,19 @@
 import { describe, expect, it, vi } from 'vitest';
-import { workbookApi } from '../src/services/workbookApi';
+import { reportError, workbookApi } from '../src/services/workbookApi';
+import { ApiError } from '../src/services/apiClient';
 import { parseUploadLimit, validateSelection } from '../src/components/uploads/uploadRequirements';
 import { cycleA, jsonResponse } from './fixtures/workspace';
 import { workbookFile, workbookFixture } from './fixtures/workbooks';
 
 describe('Workbook API and file constraints', () => {
+  it('explains ambiguous layouts without exposing server source text or losing the request ID', () => {
+    const error = reportError(new ApiError('private source details', 'AMBIGUOUS_LAYOUT', 422, 'layout-request'));
+    expect(error.message).toContain('exactly one accepted layout');
+    expect(error.message).not.toContain('private');
+    expect(error.requestId).toBe('layout-request');
+    expect(error.code).toBe('AMBIGUOUS_LAYOUT');
+  });
+
   it('follows the real pagination envelope for saved workbook metadata', async () => {
     const a = workbookFixture();
     const b = workbookFixture('post_upload');

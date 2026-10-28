@@ -3,6 +3,21 @@ import { expect, test } from '../support/safeBrowser';
 import type { Page } from '@playwright/test';
 import type { Workbook } from '../../src/types/workbook';
 
+test('both accepted layouts and optional-column guidance remain readable at 320px', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto('/upload-reports');
+  const transformation = page.getByRole('region', { name: 'Transformation Report', exact: true });
+  const post = page.getByRole('region', { name: 'Post-Upload Report', exact: true });
+  await transformation.getByText('Required worksheets and columns').click();
+  await expect(transformation.getByRole('heading', { name: 'Detailed_LOG or Detailed_Log' })).toBeVisible();
+  await post.getByText('Required worksheets and columns').click();
+  await expect(post.getByRole('heading', { name: 'Objects or Sheet1' })).toBeVisible();
+  await expect(post.getByRole('heading', { name: 'Errors or Sheet2' })).toBeVisible();
+  await expect(post.getByText(/Sheet1 requires only Status Inf, Object Typ and Object Name/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/upload-layouts-320.png', fullPage: true, animations: 'disabled' });
+});
+
 const projectId = '00000000-0000-4000-8000-000000000101';
 const cycleOne = '00000000-0000-4000-8000-000000000102';
 const cycleTwo = '00000000-0000-4000-8000-000000000103';

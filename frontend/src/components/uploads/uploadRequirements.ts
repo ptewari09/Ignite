@@ -5,14 +5,14 @@ export const uploadRequirements: { role: WorkbookRole; title: string; descriptio
   sheets: { name: string; description: string; headers: string[] }[] }[] = [
   { role: 'transformation', title: 'Transformation Report',
     description: 'Findings generated during transformation or remediation, with the original messages and suggested actions.',
-    sheets: [{ name: 'Detailed_LOG', description: 'Transformation findings and their source messages.',
+    sheets: [{ name: 'Detailed_LOG or Detailed_Log', description: 'Use either exact worksheet name with the same required columns.',
       headers: ['Status', 'Object Type', 'Object Name', 'Error Category', 'Message', 'Suggested Action', 'File Name'] }] },
   { role: 'post_upload', title: 'Post-Upload Report',
-    description: 'The results recorded after an upload attempt, including object statuses and detailed technical messages.',
+    description: 'Object identities and detailed technical messages recorded after an upload attempt, with statuses and annotations when supplied.',
     sheets: [
-      { name: 'Objects', description: 'One row per recorded object result, including separate imported manual annotations.',
+      { name: 'Objects or Sheet1', description: 'Use Objects with Errors, or Sheet1 with Sheet2. Repeated source rows are preserved.',
         headers: ['Status Inf', 'Object Typ', 'Object Name', 'Status', 'Re Upload', 'Manually added status', 'Manually added comments'] },
-      { name: 'Errors', description: 'Detailed technical messages. Multiple messages can describe one object.',
+      { name: 'Errors or Sheet2', description: 'Detailed technical messages. All six columns are required in either layout; sequence values are preserved.',
         headers: ['Info', 'S.No', 'Object Typ', 'Object Name', 'Type', 'Message'] },
     ] },
 ];

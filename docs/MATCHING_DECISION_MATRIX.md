@@ -1,6 +1,6 @@
 # Matching decision matrix
 
-Version 0.1, 2026-10-27. Proposed synthetic acceptance scenarios for Milestones 0.9A through 0.9D. **These are test specifications, not implemented or executed tests.** The [rules specification](RECONCILIATION_RULES_SPEC.md) defines the labels and gates; the [architecture](RECONCILIATION_ARCHITECTURE.md) defines the implementation sequence.
+Version 0.4, 2026-10-28. Synthetic acceptance specifications for layout compatibility and Milestones 0.9A through 0.9D. Layout/provenance/rollback scenarios are covered by 0.8C compatibility tests. The 0.9A pure matcher now executes 31 object-level projections; attribution, error comparison, persistence, review and ML remain specifications. The [implemented matcher contract](OBJECT_MATCHER.md), [rules](RECONCILIATION_RULES_SPEC.md), [architecture](RECONCILIATION_ARCHITECTURE.md), [cross-dataset discovery](CROSS_DATASET_FINDINGS.md) and [layout contract](INGESTION_LAYOUTS.md) distinguish those boundaries.
 
 Every object, message, request and layer below is fictional. Error words express test intent; they do not establish SAP message semantics. A comparison test requiring a validated pattern must use a clearly named, test-only rule or a future approved rule, not claim that a synthetic sentence validates a production mapping.
 
@@ -12,34 +12,34 @@ Every object, message, request and layer below is fictional. Error words express
 - `T`, `U`, `M` count transformation rows, upload-object rows and technical messages respectively. These source counts must be conserved independently of the number of relationships.
 - Unless stated otherwise, identifiers are complete, safe and use the same project/cycle. All decisions initially remain `PENDING`; no customer action is approved by matching.
 
-For each future test assert the outcome **and** its reason, evidence references, unchanged raw payload, source kind/workbook/sheet/row, normalized values and source coverage. A zero candidate count must never hide the source row. Exact matches are technical key equality, not human-confirmed SAP equivalence.
+For each test assert the outcome **and** its reason, evidence references, original identities/provenance, normalized values and source coverage. Raw payloads, categories, messages and manual annotations stay outside the pure matcher's contract; layout tests separately verify its source inputs remain unchanged. A zero candidate count must never hide the source row. Exact matches are technical key equality, not human-confirmed SAP equivalence.
 
 ## 1. Object identity: 0.9A
 
 | ID | Synthetic input | Expected result | Preservation / negative assertion |
 |---|---|---|---|
-| O01 | A2 `PROG / Z_DEMO_JOB`; O2 same key | One `EXACT_OBJECT_MATCH`, 1 T and 1 U | Both source rows remain; errors are not compared in 0.9A |
+| O01 | A2 `PROG / Z_DEMO_JOB`; O2 same key | One `SHARED`, 1 T and 1 U | Both source references remain; errors are not compared in 0.9A |
 | O02 | A2 type ` prog  `, name ` z_demo_job `; O2 uppercase trimmed values | Exact normalized match with normalization reason | Display both raw spellings; do not rewrite A2 |
 | O03 | A2 name surrounded by Unicode nonbreaking-space padding; O2 same trimmed name | Exact normalized match | Outer whitespace normalization is visible and reproducible |
-| O04 | A2 `Z_DEMO  JOB`; O2 `Z_DEMO JOB` | `AMBIGUOUS`, internal-whitespace risk | Collapsed textual equality is not accepted automatically |
-| O05 | A2 non-ASCII `Z_DEMO_ß`; O2 `Z_DEMO_SS` | `AMBIGUOUS`, Unicode uppercase collision risk | No automatic equivalence based on `upper()` expansion |
-| O06 | A2 original object-name cell is numeric `123`; O2 text `123` | `AMBIGUOUS`, non-text source identity | Preserve original payload types even though importer text values agree |
+| O04 | A2 `Z_DEMO  JOB`; O2 `Z_DEMO JOB` | Two `NEEDS_REVIEW` cases, internal-whitespace collision | Collapsed textual equality is not accepted automatically |
+| O05 | A2 non-ASCII `Z_DEMO_ß`; O2 `Z_DEMO_SS` | Two `NEEDS_REVIEW` cases, Unicode uppercase collision | No automatic equivalence based on `upper()` expansion |
+| O06 | A2 original object-name cell is numeric `123`; O2 text `123` | Two `NEEDS_REVIEW` cases, non-text collision | Preserve original scalar types even though importer text values agree |
 | O07 | A2 `CLAS / /DEMO/CL_RULE=>CHECK`; O2 identical key | Exact match of that literal typed name | Do not strip namespace or method separator |
 | O08 | A2 `CLAS / ZCL_DEMO_RULE`; O2 `METH / ZCL_DEMO_RULE=>CHECK` | Separate `TRANSFORMATION_ONLY` and `UPLOAD_ONLY` groups | No inferred parent relationship from a prefix; later context requires a documented rule |
-| O09 | A2 type blank, name `Z_DEMO_JOB`; O2 `PROG / Z_DEMO_JOB` | Distinct source groups with `POSSIBLE_OBJECT_MATCH` candidate | Missing type remains blank; possible overlap does not become exact |
-| O10 | Both types blank, same safe name, one group per side | Possible relationship requiring review | No invented canonical type |
-| O11 | A2 `PROG / Z_DEMO_JOB`; O2 `CLAS / Z_DEMO_JOB` | `AMBIGUOUS`, incompatible types | No automatic alias or name-only confirmation |
-| O12 | A2 blank type/name `Z_DEMO_NODE`; O2 `CLAS` and O3 `PROG` with that name | All competing relationships remain ambiguous | No first-row winner; do not merge the two typed upload groups |
-| O13 | A2 and O2 exact `CLAS / Z_DEMO_NODE`; O3 same name with `PROG` | Keep exact pair; separate ambiguous conflicting group | A conflict cannot consume the exact pair or attach O3 to it as fact |
+| O09 | A2 type blank, name `Z_DEMO_JOB`; O2 `PROG / Z_DEMO_JOB` | Two `NEEDS_REVIEW` cases; no candidate link | Missing type stays blank; opposite same-name absence is inconclusive |
+| O10 | Both types blank, same safe name, one record per side | Two separate `NEEDS_REVIEW` cases; no relationship | No invented canonical type or name-only match |
+| O11 | A2 `PROG / Z_DEMO_JOB`; O2 `CLAS / Z_DEMO_JOB` | Two `NEEDS_REVIEW` typed groups, incompatible types | No automatic alias or name-only confirmation |
+| O12 | A2 blank type/name `Z_DEMO_NODE`; O2 `CLAS` and O3 `PROG` with that name | Three separate `NEEDS_REVIEW` cases | No first-row winner; do not merge the two typed upload groups |
+| O13 | A2 and O2 exact `CLAS / Z_DEMO_NODE`; O3 same name with `PROG` | Keep `SHARED` pair; separate `NEEDS_REVIEW` conflicting group | A conflict cannot consume the exact pair or attach O3 to it as fact |
 | O14 | A2/A3 same typed key, categories `OBJ_LOCKED` and `NO_TLAYER`; O2 same key | One exact object group, 2 T and 1 U | Both findings and categories preserved; not two matched objects |
 | O15 | A2/A3 physically duplicate findings; O2 same key | One exact object group, both T rows retained | Do not deduplicate source rows by text |
 | O16 | A2 same key as O2/O3, whose manual comments differ | One exact group, 1 T and 2 U | Keep both manual annotations; identity cannot select the “correct” comment |
 | O17 | A2 valid key absent from upload `Objects` | `TRANSFORMATION_ONLY` | No claim that a change was missed or the object is out of scope |
 | O18 | O2 valid key absent from A | `UPLOAD_ONLY` | No claim of a new automation defect |
-| O19 | A2 name blank; O2 name blank | Two separate insufficient-identity `AMBIGUOUS` cases | Blank values never match; do not group all unnamed rows together |
+| O19 | A2 name blank; O2 name blank | Two separate insufficient-identity `NEEDS_REVIEW` cases | Blank values never match; do not group all unnamed rows together |
 | O20 | A2 known name, unknown type token `DEMO_TYPE`; O2 same text | Review required for unrecognized type | Raw token accepted as source text; no invented type alias |
 | O21 | A2 `Z_DEMO_JOB`; O2 `Z_DEMO_JOB_EXTRA` | Separate one-sided groups | No substring/fuzzy automatic match |
-| O22 | Same typed name exists in two projects or cycles | Each run sees only its selected cycle | No cross-project or cross-cycle relationships |
+| O22 | Same typed name exists in two projects or cycles | Mixed/partial supplied scope raises `ValueError`; independent calls stay separate | No cross-project or cross-cycle relationships; caller supplies context |
 
 ## 2. Upload-message attribution: 0.9B
 
@@ -55,7 +55,7 @@ For each future test assert the outcome **and** its reason, evidence references,
 | A08 | E2 mentions `Z_DEMO_JOB_EXTRA`; only `Z_DEMO_JOB` exists | No body-reference candidate for the shorter name | Token boundaries prevent substring matching |
 | A09 | E2 mentions two known objects or has a structured subject conflicting with body context | Preserve subject link where valid; flag comparison/context ambiguity | Do not silently move the message to the other mentioned object |
 | A10 | Fictional sequences 1, 2, 3; final row names O2 with blank severity | At most potential block context while export contract is unconfirmed | An attractive layout is not a verified block contract |
-| A11 | A future approved export profile satisfies every block predicate | Retain explicit subject links; permit only that profile's validated context links | Subject and parent context remain distinct; approval of context does not change source identity |
+| A11 | A future approved export profile satisfies its own boundary/ordinal predicates | Retain explicit subject links; permit only that profile's validated context links | D1 reset ordinals are not a universal boundary contract; subject and parent context remain distinct |
 | A12 | Sorted rows, sequence gap, repeated 1 inside a range, missing terminal or conflicting direct anchor | Reject automatic block context for affected ranges | Preserve unaffected explicit links and all unassigned messages |
 | A13 | `S.No` values 0 or blank, which ingestion supports | Retain records; context needs review | No assumption that every accepted sequence forms a block |
 | A14 | Same typed subject appears in several blocks | Retain all source messages and separate observed ranges | No assumption of one block per object in all exports |
@@ -117,11 +117,32 @@ For each future test assert the outcome **and** its reason, evidence references,
 | X11 | Any browser acceptance test runs | Owned API 8001/UI 5174, fresh disposable database; never reuse 8000/5173 or normal database |
 | X12 | Test assertions fail or cleanup ownership is unexpected | Follow existing isolation launcher: dispose only owned verified data; preserve unexpected files; never delete normal records |
 
+## 6. Cross-dataset regression scenarios
+
+These thirteen additions raise the specification to 91 scenarios. Layouts and frequencies motivate fictional tests; no enterprise identifiers, messages or actual row examples are copied.
+
+| ID | Synthetic setup | Expected outcome / implementation stage |
+|---|---|---|
+| C01 | Transformation worksheet `Detailed_Log`, with all seven existing logical fields | Accepted by the implemented alias contract; retain actual tab name and all required fields. Arbitrary worksheets/case variants remain rejected |
+| C02 | Post-upload `Sheet1` has only identity/display fields; `Sheet2` has valid technical-message headers | Accepted by the implemented raw layout; preserve absent fields as null, absent payload keys and a missing-column warning. Never invent `UPLD_ERROR` or copy reference labels; named `Objects` still requires seven columns |
+| C03 | Object-name header and values padded to a fixed width; one name uses different ASCII case | Existing header/identifier normalization supports a technical exact-key comparison while raw padding/case remain visible; 0.9A |
+| C04 | `S.No` values are unique/increasing with gaps, e.g. 1, 2, 5, 9; many objects occur in that range | No reset-based parent attachment; retain explicit keys and unassigned context. Do not invent missing rows or infer that gaps prove filtering; 0.9B |
+| C05 | Some blank-severity terminals name subjects absent from the object list, while one listed key has no terminal | Terminal coverage is not universal. Do not create listed objects, attach the whole log to the last anchor or discard unmatched subjects; 0.9B |
+| C06 | Fifteen physical upload-object rows share one typed key, including identical payloads; reference notes differ for that key | One technical group retains all fifteen source IDs, without Cartesian message multiplication or automatic deduplication/customer-action merging; 0.9A and later review |
+| C07 | A contains `FUGR / Z_DEMO_DUAL` and `PROG / Z_DEMO_DUAL`; neither key/name occurs in U | Preserve two transformation-only typed groups but one distinct name in the name-only metric. No forced merge or fabricated opposite-side candidate; 0.9A |
+| C08 | Different objects repeat `NO_DEVC` with `NO_TLAYER`, or `SAP_OB` with `OBJ_LOCKED` | Preserve both findings; no synonym or fixed counterpart is learned from co-occurrence; 0.9B |
+| C09 | A reference has no `Out of scope` labels and no recheck tab | No inferred scope/access clearance or assertion that rechecks do not exist; retain confirmed reporting policy and mark that section not supplied |
+| C10 | Two candidate evaluation groups share objects and technical-text templates | Audit shared/near-duplicate material before allocating groups; no row-random train/test split or claimed independent accuracy |
+| C11 | Reference rows and imported human-looking annotations exist, but no verified paired IDs/negative decisions | Treat as annotation aids only. No inferred matches or omitted rows become gold labels; require reviewed/adjudicated pair evidence |
+| C12 | Both complete known post-upload pairs `Objects`/`Errors` and `Sheet1`/`Sheet2` are present | Reject `AMBIGUOUS_LAYOUT` before choosing either source. Portable tests use synthetic workbooks and never depend on Downloads or enterprise files |
+| C13 | A listed object has no direct typed message, but the separate reference contains an action/comment for it | Preserve its object-level result and mark message attribution/comparison coverage incomplete. Do not create a message link from the reference, infer resolution or treat reference membership as a verified pair label; 0.9B and evaluation |
+
 ## Acceptance sequence
 
-1. **0.9A:** implement O01–O22 and applicable conservation/empty/determinism scenarios using in-memory synthetic records. Existing fixtures are examples of importer behavior, not evidence of SAP semantic truth.
-2. **0.9B:** implement attribution and comparison tests only for enabled, justified rules. Keep unresolved mappings/context disabled or suggestion-only as specified; add negative examples before enabling stronger outcomes.
-3. **0.9C:** test persistence, source-reference integrity, idempotency, pagination, complete-input checks and atomic failure handling against pytest temporary databases migrated by Alembic.
-4. **0.9D:** test review/audit/concurrency behavior and accessible side-by-side evidence in isolated browsers. Keep report/export approval outside this step unless separately authorized.
+1. **Layout compatibility complete:** C01/C02/C12 and provenance/null/rollback cases are exercised by compatibility tests. Original workbooks remain unchanged.
+2. **0.9A complete:** [automated acceptance tests](../backend/tests/unit/test_object_acceptance.py) execute **31** object-level projections: O01–O22, C03/C06/C07, X01/X02/X03/X04/X07/X10. These plus focused unit tests give **64** new matcher passes. X scenarios cover collections/determinism/offline snapshots only, without workbook-presence warnings, message retention/attribution, production loading, APIs or persistence. O14–O16/C06 assert grouping and source references; category/manual-payload behavior remains outside this engine. The other 60 scenarios are not claimed as object-engine acceptance. See [scope and results](OBJECT_MATCHER.md).
+3. **0.9B:** implement attribution and comparison tests only for enabled, justified rules, including C04/C05/C08. Keep unresolved mappings/context disabled or suggestion-only as specified; add negative examples before enabling stronger outcomes.
+4. **0.9C:** test persistence, source-reference integrity, idempotency, pagination, complete-input checks and atomic failure handling against pytest temporary databases migrated by Alembic.
+5. **0.9D:** test review/audit/concurrency behavior and accessible side-by-side evidence in isolated browsers. Keep report/export approval outside this step unless separately authorized. C09–C11 preserve policy/evaluation boundaries, not trained-model behavior.
 
 No scenario above authorizes changing source workbooks, storing fixtures in the normal database, implementing a screen now or treating the standalone Downloads demo files as validated business ground truth.

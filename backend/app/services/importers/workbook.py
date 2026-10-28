@@ -6,6 +6,7 @@ from openpyxl import load_workbook
 
 from app.core.config import Settings
 from app.core.errors import AppError
+from app.services.importers.layouts import select_layout
 from app.services.importers.transformation import parse_transformation
 from app.services.importers.types import ImportWarning, ParsedWorkbook
 from app.services.importers.upload_errors import parse_upload_errors
@@ -25,17 +26,17 @@ def parse_workbook(content: bytes, role: str, settings: Settings) -> ParsedWorkb
             warnings.simplefilter("always", UserWarning)
             book = load_workbook(source, read_only=True, data_only=False, keep_links=False)
             try:
-                required = ("Detailed_LOG",) if role == "transformation" else ("Objects", "Errors")
-                missing = [name for name in required if name not in book.sheetnames]
-                if missing:
-                    raise AppError(422, "MISSING_WORKSHEETS", f"Required worksheets are missing: {', '.join(missing)}.")
+                layout = select_layout(book.sheetnames, role)
                 result = ParsedWorkbook(sheets_found=book.sheetnames)
-                adapters = [("Detailed_LOG", parse_transformation, "transformation")] if role == "transformation" else [
-                    ("Objects", parse_upload_objects, "upload_objects"),
-                    ("Errors", parse_upload_errors, "upload_errors"),
+                adapters = [(layout.transformation_sheet, parse_transformation, "transformation")] if role == "transformation" else [
+                    (layout.object_sheet, parse_upload_objects, "upload_objects"),
+                    (layout.error_sheet, parse_upload_errors, "upload_errors"),
                 ]
                 for name, adapter, target in adapters:
-                    parsed = adapter(book[name], settings)
+                    if target == "upload_objects":
+                        parsed = adapter(book[name], settings, optional_status_columns=layout.optional_object_status)
+                    else:
+                        parsed = adapter(book[name], settings)
                     setattr(result, target, parsed.records)
                     result.row_counts[name] = len(parsed.records)
                     result.object_counts[name] = parsed.object_count

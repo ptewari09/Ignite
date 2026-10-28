@@ -14,7 +14,7 @@ def parse_upload_errors(sheet, settings: Settings) -> ParsedSheet[UploadMessage]
         if is_blank(sequence):
             sequence = None
         elif not isinstance(sequence, int) or isinstance(sequence, bool):
-            raise AppError(422, "INVALID_SEQUENCE", "Errors.S.No must contain integers or blank values; original values are never inferred.")
+            raise AppError(422, "INVALID_SEQUENCE", f"{sheet.title}.S.No must contain integers or blank values; original values are never inferred.")
         records.append(UploadMessage(
             **row.identity("Object Typ"),
             info_raw=raw_text(row.values["Info"]),

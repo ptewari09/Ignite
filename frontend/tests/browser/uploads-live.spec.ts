@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 import { expect, test } from '../support/liveFixture';
 import type { Page } from '@playwright/test';
 import type { WorkbookUpload } from '../../src/types/workbook';
+import type { UploadError, UploadObject } from '../../src/types/evidence';
+import type { Page as EvidencePage } from '../../src/types/workspace';
 
 test('live FastAPI validates synthetic XLSX files and persists both roles without replacement', async ({ page, request, verifiedLiveApi: api }, testInfo) => {
   test.setTimeout(90_000);
@@ -21,6 +23,14 @@ test('live FastAPI validates synthetic XLSX files and persists both roles withou
     'book = load_workbook(folder / "synthetic-transformation.xlsx")',
     'book["Detailed_LOG"].cell(2, 5).value = "A different fictional message."',
     'book.save(folder / "different-transformation.xlsx")', 'book.close()',
+    'sys.path.insert(0, str(Path.cwd() / "backend"))',
+    'from tests.fixtures.workbooks import raw_post_upload_bytes, transformation_layout_bytes',
+    '(folder / "raw-transformation.xlsx").write_bytes(transformation_layout_bytes("Detailed_Log"))',
+    '(folder / "raw-post-upload.xlsx").write_bytes(raw_post_upload_bytes())',
+    'book = load_workbook(folder / "raw-post-upload.xlsx")',
+    'book.copy_worksheet(book["Sheet1"]).title = "Objects"',
+    'book.copy_worksheet(book["Sheet2"]).title = "Errors"',
+    'book.save(folder / "ambiguous-post-upload.xlsx")', 'book.close()',
   ].join('\n');
   execFileSync(python, ['-c', build, testInfo.outputDir], { cwd: root, stdio: 'pipe' });
   const errors: string[] = [];
@@ -103,5 +113,47 @@ test('live FastAPI validates synthetic XLSX files and persists both roles withou
   await page.getByRole('button', { name: 'Select cycle Synthetic ingestion cycle' }).click();
   await navigation.getByRole('link', { name: 'Upload Reports', exact: true }).click();
   await expect(page.getByText('Uploaded successfully', { exact: true })).toHaveCount(2);
+  // A fresh cycle tests the second layout through the real upload controls.
+  const rawCycleHttp = await request.post(`${api}/projects/${project.id}/cycles`, { data: { name: 'Synthetic raw layout cycle' } });
+  expect(rawCycleHttp.status()).toBe(201);
+  const rawCycle = await rawCycleHttp.json() as { id: string };
+  await navigation.getByRole('link', { name: 'Projects', exact: true }).click();
+  await page.getByRole('button', { name: 'Select cycle Synthetic raw layout cycle', exact: true }).click();
+  await navigation.getByRole('link', { name: 'Upload Reports', exact: true }).click();
+  const rawEndpoint = `${api}/cycles/${rawCycle.id}/workbooks`;
+  async function rawUpload(title: string, filename: string, status: number) {
+    await page.getByLabel(`${title} workbook`, { exact: true }).setInputFiles(resolve(testInfo.outputDir, filename));
+    const response = page.waitForResponse((result) => result.url() === rawEndpoint && result.request().method() === 'POST');
+    await page.getByRole('button', { name: `Upload ${title}`, exact: true }).click();
+    const http = await response;
+    expect(http.status()).toBe(status);
+    return await http.json() as WorkbookUpload;
+  }
+  await rawUpload('Post-Upload Report', 'ambiguous-post-upload.xlsx', 422);
+  await expect(page.getByRole('alert')).toContainText('exactly one accepted layout');
+  expect((await (await request.get(rawEndpoint)).json()).total).toBe(0);
+  const rawTransformation = await rawUpload('Transformation Report', 'raw-transformation.xlsx', 201);
+  expect(rawTransformation.workbook.row_counts).toEqual({ Detailed_Log: 3 });
+  const rawPost = await rawUpload('Post-Upload Report', 'raw-post-upload.xlsx', 201);
+  expect(rawPost.workbook.row_counts).toEqual({ Sheet1: 3, Sheet2: 4 });
+  expect(rawPost.workbook.warnings).toContainEqual(expect.objectContaining({ code: 'MISSING_OPTIONAL_COLUMNS', count: 4, worksheet_name: 'Sheet1' }));
+  const rawObjects = await (await request.get(`${api}/cycles/${rawCycle.id}/upload-objects`)).json() as EvidencePage<UploadObject>;
+  expect(rawObjects.total).toBe(3);
+  for (const row of rawObjects.items) {
+    expect(row.worksheet_name).toBe('Sheet1');
+    expect(row.tool_status_raw).toBeNull();
+    expect(row.re_upload_raw).toBeNull();
+    expect(row.manual_status_raw).toBeNull();
+    expect(row.manual_comments_raw).toBeNull();
+    expect(Object.keys(row.raw_payload)).toHaveLength(3);
+    expect(row.raw_payload).not.toHaveProperty('Status');
+  }
+  const rawMessages = await (await request.get(`${api}/cycles/${rawCycle.id}/upload-errors`)).json() as EvidencePage<UploadError>;
+  expect(rawMessages.items.map((row) => row.sequence_number)).toEqual([1, 2, 7, 11]);
+  expect(rawMessages.items.every((row) => row.worksheet_name === 'Sheet2')).toBe(true);
+  await expect(page.getByRole('heading', { name: 'Sheet1', exact: true })).toBeVisible();
+  const postCard = page.getByRole('region', { name: 'Post-Upload Report', exact: true });
+  await postCard.getByText(/Import warnings/).click();
+  await expect(postCard.getByText(/Source columns not supplied:/)).toBeVisible();
   expect(errors).toEqual([]);
 });

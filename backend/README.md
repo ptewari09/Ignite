@@ -145,9 +145,9 @@ For approved local use with the actual source files, replace the two resolved de
 
 ## Parsing, validation and evidence integrity
 
-Separate adapters parse `Detailed_LOG`, `Objects` and `Errors`. A shared worksheet reader checks row-1 headers and source cells. Parsers return structured records/warnings; `services/ingestion.py` persists metadata, evidence and cycle status in one transaction. The API does not retain uploaded binaries on disk or in SQLite; keep originals separately. Filename metadata drops directory components so local paths are not exposed.
+Separate adapters parse either `Detailed_LOG`/`Detailed_Log`, or a post-upload pair of `Objects`/`Errors` or `Sheet1`/`Sheet2`. Explicit layout selection chooses a recognized source shape; the adapters then validate row-1 headers and source cells. Parsers return structured records/warnings; `services/ingestion.py` persists metadata, evidence and cycle status in one transaction. The API does not retain uploaded binaries on disk or in SQLite; keep originals separately. Filename metadata drops directory components so local paths are not exposed.
 
-The adapters require the documented headers for the currently verified layouts: seven transformation columns, seven upload-object columns (including the explicitly manual fields), and six upload-message columns. Header whitespace is normalized; original header spellings remain JSON keys. `Summary` is optional and ignored for processing. Additional named columns are preserved; unlabeled populated columns and colliding headers are rejected to avoid data loss. Supporting pristine exports without the manual columns is a future adapter decision, not a silent inference.
+The adapters require seven transformation columns, seven named-layout `Objects` columns and six technical-message columns. The raw `Sheet1` layout requires only `Status Inf`, `Object Typ` and `Object Name`; `Status`, `Re Upload` and both manual columns are optional. Missing fields remain null and absent from `raw_payload`; supplied blank cells retain their original header key with a null value. `MISSING_OPTIONAL_COLUMNS` counts absent columns, not rows. Header whitespace is normalized; original header spellings remain JSON keys. `Summary` is optional and ignored. Additional named columns are preserved; unlabeled populated columns and colliding headers are rejected. Both complete post-upload pairs in one workbook produce HTTP 422 `AMBIGUOUS_LAYOUT`; unsupported names/headers are never guessed. See [the complete layout contract](../docs/INGESTION_LAYOUTS.md).
 
 Only readable `.xlsx` files are accepted, case-insensitively. Validation checks cycle/role, extension, actual workbook readability, required tabs/headers and configured size/row limits. Expanded ZIP size is bounded, and relevant sheets are limited to 128 columns. Formula/error cells are rejected with a values-only-export instruction; no macros, formula evaluation, external-link resolution or password-protected workbooks are supported. Errors name the issue without echoing source values. Import warnings contain aggregate counts and fixed explanations.
 
@@ -186,6 +186,24 @@ Verified on 2026-10-24 with Python 3.12.4: the default suite has **67 passing te
 
 Actual local sample ingestion matched discovery exactly: `Detailed_LOG` **361**, `Objects` **205**, `Errors` **1,226**. Every raw payload and Excel row location was compared with the original, repeated identities were retained, and manual/tool fields were checked separately. All three original workbook hashes remained unchanged; the third workbook was hashed only, not ingested. This isolated local verification took about **2.23 seconds** including readback checks on the development laptop; it is not a measured review-time saving or matching-accuracy result.
 
+## Multi-layout compatibility verification
+
+Verified on 2026-10-28: **103 backend tests passed, one confidential-data test intentionally skipped**. New synthetic coverage includes both transformation spellings, named/raw post-upload layouts, required/optional fields, missing versus empty payload keys, ordinal gaps, duplicate identities, ambiguity, API pagination, duplicate/conflicting uploads and atomic rollback. No schema/model/migration or ingestion endpoint was added. The existing upstream TestClient warning remains.
+
+Read-only parsing of the four locally available source workbooks returned exactly **361 / 205 / 1,226** rows for Dataset 1 and **421 / 163 / 865** for Dataset 2. All four absent Dataset 2 fields remain null; source worksheet names, raw values and row numbers are preserved. The normal database and all six source/reference workbook hashes were checked for unchanged bytes. No customer/reference workbook was ingested. See [INGESTION_LAYOUTS.md](../docs/INGESTION_LAYOUTS.md) for the contract, missing-column representation, file inventory and portability check.
+
+## Pure object matching
+
+The backend now includes `app/services/reconciliation`: immutable identity/provenance snapshots and a pure `reconcile_objects(transformation, upload_objects)` service. It returns `SHARED`, `TRANSFORMATION_ONLY`, `UPLOAD_ONLY` or `NEEDS_REVIEW`, preserves repeated source references, and checks missing/conflicting identities and normalization collisions. It performs no database/file/network I/O and is not connected to an API or screen yet. Object overlap is not error correspondence or customer approval.
+
+See [the input/output contract, acceptance mapping and benchmark](../docs/OBJECT_MATCHER.md). No dependency installation or migration is needed beyond the existing environment. From the repository root:
+
+```powershell
+& .\backend\.venv\Scripts\python.exe -m pytest -c backend/pyproject.toml backend/tests/unit/test_object_matching.py backend/tests/unit/test_object_acceptance.py -q
+```
+
+Verified on 2026-10-28: **64 new matcher tests passed**, including **31 applicable object-level acceptance projections**; **167 backend tests passed, one confidential-data test intentionally skipped**. The existing upstream TestClient/httpx warning remains. No normal-database data or confidential workbook was changed; ingestion regression coverage still passes.
+
 ## Demo Portability Check
 
 - Source/configuration contains no fixed username, clone location or required existing virtual environment/database. Relative database paths resolve from the current clone; an override is configurable.
@@ -201,7 +219,7 @@ Actual local sample ingestion matched discovery exactly: `Detailed_LOG` **361**,
 - `app/api`: versioned router and HTTP endpoint handlers.
 - `app/schemas`: typed response shapes.
 - `app/db`: database connection/session helpers and project/cycle/workbook/evidence models.
-- `app/services`: normalization, separate sheet adapters and atomic ingestion persistence; no matching yet.
+- `app/services`: normalization, separate sheet adapters, atomic ingestion persistence and pure object matching; message attribution/error comparison remain future work.
 - `app/scripts`: read-only discovery utility and fictional demo workbook generator.
 - `alembic`: version-controlled schema changes, separate from application startup.
 - `tests/unit` and `tests/integration`: isolated configuration and connected API/database checks.

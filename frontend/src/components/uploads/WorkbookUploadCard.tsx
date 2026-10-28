@@ -97,9 +97,9 @@ export function WorkbookUploadCard({ requirement, cycleId, workbook, ready, onIm
       <div><span className="panel-eyebrow">{role === 'transformation' ? 'Initial findings' : 'After upload'}</span><h2 id={`${id}-title`}>{title}</h2></div></div>
     <p className="panel-description">{description}</p>
     <details className="workbook-requirements"><summary>Required worksheets and columns</summary>
-      <p>Use text headers in Excel row 1. Header whitespace is normalized; values-only exports are required. Summary sheets are optional.</p>
+      <p>Choose one supported worksheet layout with text headers in Excel row 1. Header whitespace is normalized; values-only exports are required. Summary sheets are optional.</p>
       {sheets.map((sheet) => <div key={sheet.name}><h3>{sheet.name}</h3><p>{sheet.description}</p><ul>{sheet.headers.map((header) => <li key={header}>{header}</li>)}</ul></div>)}
-      {role === 'post_upload' && <p>The current format requires both manual annotation columns, even when their values are blank. Imported annotations do not imply approval.</p>}
+      {role === 'post_upload' && <p>Use exactly one pair: Objects + Errors, or Sheet1 + Sheet2. Objects requires all seven listed columns. Sheet1 requires only Status Inf, Object Typ and Object Name; Status, Re Upload and both manual annotation columns are optional. Missing columns remain not supplied. Imported annotations do not imply approval.</p>}
     </details>
     {workbook ? <ImportDetails workbook={workbook} verified={ready} /> : <p className="upload-saved-status">{unconfirmed ? 'Upload outcome is unconfirmed. Refresh saved reports.' : ready ? 'Not uploaded' : cycleId ? 'Saved workbook status unavailable until checked' : 'Select a cycle to upload'}</p>}
     {workbook && <p className="upload-occupied-note">This report is already saved. You can check an identical duplicate below. Use another cycle for a different workbook; saved evidence cannot be replaced.</p>}

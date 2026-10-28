@@ -26,6 +26,21 @@ function select(file = workbookFile(), title = 'Transformation Report') {
 }
 
 describe('Upload Reports', () => {
+  it('explains both accepted worksheet layouts and the raw optional columns without fetching data', async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    renderUploadEmpty();
+    const user = userEvent.setup();
+    await user.click(within(card()).getByText('Required worksheets and columns'));
+    expect(within(card()).getByRole('heading', { name: 'Detailed_LOG or Detailed_Log' })).toBeVisible();
+    const post = within(card('Post-Upload Report'));
+    await user.click(post.getByText('Required worksheets and columns'));
+    expect(post.getByRole('heading', { name: 'Objects or Sheet1' })).toBeVisible();
+    expect(post.getByRole('heading', { name: 'Errors or Sheet2' })).toBeVisible();
+    expect(post.getByText(/Sheet1 requires only Status Inf, Object Typ and Object Name/)).toBeVisible();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it('shows an honest empty workspace with two disabled cards and a working Projects link', async () => {
     const fetch = vi.fn();
     vi.stubGlobal('fetch', fetch);
